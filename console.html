@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="FloorSight — dealer risk intelligence for floorplan lenders. Product demo with fictional data.">
+<title>FloorSight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============ tokens ============ */
+:root{
+  --bg:#f4f6f8; --surface:#fbfcfd; --surface2:#eef1f4;
+  --ink:#101418; --ink2:#4d5761; --muted:#8a94a0;
+  --grid:#e2e7ec; --border:rgba(16,20,24,.10); --border2:rgba(16,20,24,.16);
+  --accent:#2a78d6; --accent-ink:#1c5cab; --accent-soft:#cde2fb;
+  --good:#0ca30c; --good-text:#006300; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --series-red:#e34948;
+  --shadow:0 1px 2px rgba(16,20,24,.05),0 8px 28px rgba(16,20,24,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1114; --surface:#171b1f; --surface2:#1e242a;
+    --ink:#f2f5f7; --ink2:#b7c0c9; --muted:#7f8a95;
+    --grid:#262c33; --border:rgba(242,245,247,.10); --border2:rgba(242,245,247,.18);
+    --accent:#3987e5; --accent-ink:#86b6ef; --accent-soft:#123055;
+    --good-text:#0ca30c; --series-red:#e66767;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 32px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1114; --surface:#171b1f; --surface2:#1e242a;
+  --ink:#f2f5f7; --ink2:#b7c0c9; --muted:#7f8a95;
+  --grid:#262c33; --border:rgba(242,245,247,.10); --border2:rgba(242,245,247,.18);
+  --accent:#3987e5; --accent-ink:#86b6ef; --accent-soft:#123055;
+  --good-text:#0ca30c; --series-red:#e66767;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 32px rgba(0,0,0,.45);
+}
+
+/* ============ base ============ */
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Archivo",system-ui,sans-serif; line-height:1.12; text-wrap:balance; margin:0}
+.mono{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace}
+a{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+svg text{font-family:"Spline Sans Mono",ui-monospace,monospace}
+
+/* ============ nav ============ */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  display:flex; align-items:center; gap:8px;
+  padding:10px 20px; background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--border);
+}
+.nav .brand{font-family:"Archivo"; font-weight:800; font-size:17px; letter-spacing:-.01em; margin-right:auto; display:flex; align-items:center; gap:9px; color:var(--ink); text-decoration:none}
+.brand .mark{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;font-family:"Spline Sans Mono"}
+.nav a.ch{
+  font-family:"Spline Sans Mono"; font-size:12px; letter-spacing:.04em; text-decoration:none;
+  color:var(--muted); padding:6px 10px; border-radius:99px; white-space:nowrap;
+}
+.nav a.ch:hover{color:var(--ink); background:var(--surface2)}
+.nav a.ch.active{color:var(--accent-ink); background:var(--accent-soft)}
+.nav a.ch b{font-weight:600; margin-right:5px; opacity:.6}
+@media(max-width:900px){.nav a.ch span{display:none}.nav a.ch b{margin:0}}
+
+/* ============ sections ============ */
+section{max-width:1140px; margin:0 auto; padding:96px 24px 40px; scroll-margin-top:48px}
+.eyebrow{font-family:"Spline Sans Mono"; font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-ink); margin-bottom:14px}
+.eyebrow .n{color:var(--muted); margin-right:8px}
+section>h2{font-size:clamp(26px,3.6vw,40px); font-weight:800; letter-spacing:-.015em; margin-bottom:12px}
+.lede{max-width:62ch; color:var(--ink2); font-size:17px; margin:0 0 32px}
+.lede b{color:var(--ink)}
+
+/* ============ hero ============ */
+.hero{min-height:92vh; display:flex; flex-direction:column; justify-content:center; padding-top:120px}
+.hero h1{font-size:clamp(38px,6vw,72px); font-weight:800; letter-spacing:-.025em; max-width:20ch}
+.hero h1 em{font-style:normal; color:var(--accent)}
+.hero .sub{max-width:58ch; font-size:19px; color:var(--ink2); margin:22px 0 40px}
+.hero-stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
+.tile{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; box-shadow:var(--shadow)}
+.tile .k{font-family:"Spline Sans Mono"; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:7px}
+.tile .v{font-family:"Archivo"; font-size:34px; font-weight:800; letter-spacing:-.02em; margin-top:6px; line-height:1.05}
+.tile .d{font-size:13px; color:var(--ink2); margin-top:4px}
+.tile.crit .v{color:var(--critical)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.scroll-hint{margin-top:56px; font-family:"Spline Sans Mono"; font-size:12px; letter-spacing:.1em; color:var(--muted)}
+
+/* ============ cards / panels ============ */
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:26px; box-shadow:var(--shadow)}
+.panel h3{font-size:17px; font-weight:700; margin-bottom:4px}
+.panel .hint{font-size:13px; color:var(--muted); margin:0 0 16px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+@media(max-width:880px){.grid2{grid-template-columns:1fr}}
+
+/* ============ tier chips ============ */
+.chip{display:inline-flex; align-items:center; gap:6px; font-family:"Spline Sans Mono"; font-size:11px; font-weight:600; letter-spacing:.06em; padding:3px 10px; border-radius:99px; border:1px solid; white-space:nowrap}
+.chip svg{flex:none}
+.chip.prime{color:var(--good-text); border-color:color-mix(in srgb,var(--good) 50%,transparent); background:color-mix(in srgb,var(--good) 10%,transparent)}
+.chip.standard{color:var(--accent-ink); border-color:color-mix(in srgb,var(--accent) 45%,transparent); background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.chip.watch{color:color-mix(in srgb,var(--warning) 70%,var(--ink)); border-color:color-mix(in srgb,var(--warning) 55%,transparent); background:color-mix(in srgb,var(--warning) 12%,transparent)}
+.chip.elevated{color:color-mix(in srgb,var(--serious) 75%,var(--ink)); border-color:color-mix(in srgb,var(--serious) 55%,transparent); background:color-mix(in srgb,var(--serious) 12%,transparent)}
+.chip.critical{color:var(--critical); border-color:color-mix(in srgb,var(--critical) 55%,transparent); background:color-mix(in srgb,var(--critical) 10%,transparent)}
+
+/* ============ carry-gap section ============ */
+.lifecycle{overflow-x:auto}
+.carry-note{display:flex; gap:12px; align-items:flex-start; background:color-mix(in srgb,var(--critical) 7%,var(--surface)); border:1px solid color-mix(in srgb,var(--critical) 30%,transparent); border-radius:12px; padding:14px 16px; margin-top:18px; font-size:14px; color:var(--ink2)}
+.carry-note b{color:var(--critical)}
+
+/* ============ score anatomy ============ */
+.score-wrap{display:grid; grid-template-columns:340px 1fr; gap:26px; align-items:start}
+@media(max-width:880px){.score-wrap{grid-template-columns:1fr}}
+.factor{display:grid; grid-template-columns:170px 1fr 62px; gap:12px; align-items:center; padding:11px 12px; border-radius:10px; cursor:pointer; border:1px solid transparent; background:none; width:100%; text-align:left; color:var(--ink); font:inherit}
+.factor:hover{background:var(--surface2)}
+.factor.sel{background:var(--accent-soft); border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.factor .fname{font-weight:600; font-size:14px}
+.factor .bar{height:10px; border-radius:5px; background:var(--surface2); overflow:hidden}
+.factor .bar i{display:block; height:100%; border-radius:5px; background:var(--accent)}
+.factor .w{font-family:"Spline Sans Mono"; font-size:13px; color:var(--ink2); text-align:right}
+.factor-detail{margin-top:14px; padding:16px 18px; border-left:3px solid var(--accent); background:var(--surface2); border-radius:0 12px 12px 0; font-size:14.5px; color:var(--ink2)}
+.factor-detail b{color:var(--ink)}
+
+/* ============ portfolio table ============ */
+.console-head{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px}
+.tbl-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:var(--shadow)}
+table{border-collapse:collapse; width:100%; min-width:880px; font-size:14px}
+th{font-family:"Spline Sans Mono"; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; text-align:left; padding:12px 14px; border-bottom:1px solid var(--grid); white-space:nowrap}
+th.sortable{cursor:pointer; user-select:none}
+th.sortable:hover{color:var(--ink)}
+th .arr{opacity:.9; margin-left:3px}
+td{padding:12px 14px; border-bottom:1px solid var(--grid); vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer; transition:background .12s}
+tbody tr:hover{background:var(--surface2)}
+tbody tr.sel{background:var(--accent-soft)}
+td.num{font-family:"Spline Sans Mono"; font-variant-numeric:tabular-nums; text-align:right}
+.dealer-cell b{font-weight:600; display:block}
+.dealer-cell span{font-family:"Spline Sans Mono"; font-size:11px; color:var(--muted)}
+.score-cell{font-family:"Archivo"; font-weight:800; font-size:19px}
+.delta{font-family:"Spline Sans Mono"; font-size:11.5px; margin-left:6px}
+.delta.up{color:var(--good-text)} .delta.down{color:var(--critical)}
+.mini-note{font-size:12.5px; color:var(--muted); margin-top:10px}
+
+/* ============ dealer file ============ */
+.file-head{display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-bottom:22px}
+.file-head .who h3{font-size:24px; font-weight:800}
+.file-head .who .meta{font-family:"Spline Sans Mono"; font-size:12.5px; color:var(--muted); margin-top:4px}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px}
+.kpi{background:var(--surface2); border-radius:12px; padding:12px 14px}
+.kpi .k{font-family:"Spline Sans Mono"; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.kpi .v{font-family:"Archivo"; font-weight:700; font-size:21px; margin-top:3px}
+.kpi .v.bad{color:var(--critical)}
+.alerts{display:flex; flex-direction:column; gap:10px}
+.alert{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface)}
+.alert .sev{flex:none; margin-top:2px}
+.alert .t{font-weight:600; font-size:14px}
+.alert .m{font-size:12.5px; color:var(--muted); font-family:"Spline Sans Mono"; margin-top:2px}
+.sev-ic{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;font-family:"Spline Sans Mono"}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink2); margin-top:10px}
+.legend .li{display:flex; align-items:center; gap:6px}
+.sw{width:14px; height:3px; border-radius:2px; display:inline-block}
+.sw.sq{width:11px;height:11px;border-radius:3px}
+
+/* ============ simulator ============ */
+.sim{display:grid; grid-template-columns:1fr 360px; gap:26px; align-items:start}
+@media(max-width:880px){.sim{grid-template-columns:1fr}}
+.sim-controls label{font-weight:600; font-size:14.5px; display:block; margin-bottom:10px}
+input[type=range]{width:100%; accent-color:var(--accent); height:32px}
+.sim-read{display:flex; justify-content:space-between; font-family:"Spline Sans Mono"; font-size:12px; color:var(--muted); margin-top:-4px}
+.sim-out{display:grid; gap:12px; margin-top:22px}
+.sim-line{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 0; border-bottom:1px dashed var(--grid); font-size:14.5px; color:var(--ink2)}
+.sim-line .v{font-family:"Archivo"; font-weight:800; font-size:22px; color:var(--ink)}
+.sim-line .v.bad{color:var(--critical)}
+.sim-verdict{margin-top:16px; font-size:14.5px; color:var(--ink2); min-height:66px}
+.sim-verdict b{color:var(--ink)}
+
+/* ============ score selector ============ */
+.score-sel{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px}
+.score-sel button{font-family:"Spline Sans Mono"; font-size:11px; font-weight:600; letter-spacing:.05em;
+  padding:4px 10px; border-radius:99px; border:1px solid var(--border2); background:var(--surface);
+  color:var(--ink2); cursor:pointer}
+.score-sel button:hover{background:var(--surface2); color:var(--ink)}
+.score-sel button.on{background:var(--accent-soft); border-color:color-mix(in srgb,var(--accent) 45%,transparent); color:var(--accent-ink)}
+.gscore{cursor:pointer}
+.factor .w b{display:block; font-size:15px; color:var(--ink); font-weight:600}
+.factor .w span{font-size:10px; color:var(--muted)}
+.fd-grade{margin-top:10px; padding-top:10px; border-top:1px dashed var(--grid); font-family:"Spline Sans Mono"; font-size:12.5px}
+
+/* ============ alert feed ============ */
+.feed-wrap{display:grid; grid-template-columns:300px 1fr; gap:22px; align-items:start}
+@media(max-width:880px){.feed-wrap{grid-template-columns:1fr}}
+.btn{font-family:"Spline Sans Mono"; font-size:12.5px; font-weight:600; letter-spacing:.04em;
+  padding:9px 16px; border-radius:10px; border:1px solid var(--border2); background:var(--surface);
+  color:var(--ink); cursor:pointer}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+.feed-counter .v{font-family:"Archivo"; font-size:40px; font-weight:800; letter-spacing:-.02em; line-height:1.05; margin-top:6px}
+.feed-counter .v.hot{color:var(--critical)}
+.feed-counter .d{font-family:"Spline Sans Mono"; font-size:11.5px; color:var(--muted); margin-top:6px}
+.inbox{display:flex; flex-direction:column; gap:8px; min-height:340px}
+.inbox-empty{border:1px dashed var(--border2); border-radius:12px; padding:38px 20px; text-align:center; color:var(--muted); font-size:14px}
+.mail{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:12px;
+  border:1px solid var(--border); background:var(--surface); animation:mailin .3s ease}
+@keyframes mailin{from{opacity:0; transform:translateY(-8px)}}
+.mail .mail-b{flex:1; min-width:0}
+.mail-top{display:flex; justify-content:space-between; gap:10px; font-family:"Spline Sans Mono"; font-size:10.5px; letter-spacing:.08em; color:var(--muted)}
+.mail-top .kind{font-weight:600}
+.mail-top .kind.critical{color:var(--critical)} .mail-top .kind.serious{color:var(--serious)}
+.mail-top .kind.warning{color:color-mix(in srgb,var(--warning) 70%,var(--ink))} .mail-top .kind.good{color:var(--good-text)}
+.mail-subj{font-weight:600; font-size:14px; margin-top:3px}
+.mail-body{font-size:13px; color:var(--ink2); margin-top:2px}
+.mail-amt{font-family:"Spline Sans Mono"; font-size:13px; font-weight:600; white-space:nowrap; margin-top:14px}
+.mail-amt.up{color:var(--critical)} .mail-amt.down{color:var(--good-text)} .mail-amt.flat{color:var(--muted)}
+
+/* ============ lot check ============ */
+.lot-wrap{display:grid; grid-template-columns:1fr 320px; gap:22px; align-items:start}
+@media(max-width:880px){.lot-wrap{grid-template-columns:1fr}}
+.lot-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px}
+.lot-chips button{display:inline-flex; align-items:center; gap:7px; font-family:"Spline Sans Mono"; font-size:11px;
+  font-weight:600; letter-spacing:.04em; padding:5px 11px; border-radius:99px; border:1px solid var(--border2);
+  background:var(--surface); color:var(--ink2); cursor:pointer}
+.lot-chips button:hover{background:var(--surface2); color:var(--ink)}
+.lot-chips button.on{border-color:var(--accent); color:var(--accent-ink); background:var(--accent-soft)}
+.lot-chips .cnt{font-weight:400; color:var(--muted)}
+.lot-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(52px,1fr)); gap:7px}
+.lot-tile{position:relative; aspect-ratio:1; border-radius:10px; border:1.5px solid var(--border2);
+  background:var(--surface2); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; cursor:pointer; font-family:"Spline Sans Mono"; transition:transform .1s, opacity .15s; padding:0}
+.lot-tile:hover{transform:translateY(-2px)}
+.lot-tile .ic{font-size:15px; font-weight:700; line-height:1}
+.lot-tile .dd{font-size:9px; color:var(--muted)}
+.lot-tile.dim{opacity:.18; pointer-events:auto}
+.lot-tile.pick{outline:2px solid var(--accent); outline-offset:2px}
+.lot-tile.st-on_lot{border-color:color-mix(in srgb,var(--good) 45%,transparent); background:color-mix(in srgb,var(--good) 9%,var(--surface))}
+.lot-tile.st-on_lot .ic{color:var(--good-text)}
+.lot-tile.st-sold{border-color:color-mix(in srgb,var(--accent) 50%,transparent); background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.lot-tile.st-sold .ic{color:var(--accent-ink)}
+.lot-tile.st-sold.overdue{border-color:color-mix(in srgb,var(--critical) 60%,transparent); background:color-mix(in srgb,var(--critical) 10%,var(--surface))}
+.lot-tile.st-sold.overdue .ic{color:var(--critical)}
+.lot-tile.st-body_shop{border-color:color-mix(in srgb,var(--warning) 55%,transparent); background:color-mix(in srgb,var(--warning) 12%,var(--surface))}
+.lot-tile.st-body_shop .ic{color:color-mix(in srgb,var(--warning) 70%,var(--ink))}
+.lot-tile.st-in_transit,.lot-tile.st-demo{border-color:var(--border2); background:var(--surface2)}
+.lot-tile.st-in_transit .ic,.lot-tile.st-demo .ic{color:var(--ink2)}
+.lot-tile.st-unknown{border-color:var(--critical); background:color-mix(in srgb,var(--critical) 13%,var(--surface))}
+.lot-tile.st-unknown .ic{color:var(--critical)}
+.lot-detail{border:1px solid var(--border); border-radius:12px; background:var(--surface2); padding:16px 18px; min-height:190px}
+.lot-detail .car{font-family:"Archivo"; font-weight:700; font-size:17px}
+.lot-detail .vin{font-family:"Spline Sans Mono"; font-size:11px; color:var(--muted); margin:2px 0 10px}
+.lot-detail .rowl{display:flex; justify-content:space-between; gap:10px; font-size:13px; color:var(--ink2);
+  padding:6px 0; border-bottom:1px dashed var(--grid)}
+.lot-detail .rowl:last-of-type{border-bottom:none}
+.lot-detail .rowl b{font-family:"Spline Sans Mono"; color:var(--ink); font-weight:600}
+.lot-detail .note{margin-top:10px; font-size:13px; color:var(--ink2); border-left:3px solid var(--accent);
+  padding:6px 10px; background:var(--surface); border-radius:0 8px 8px 0}
+.lot-detail .note.risk{border-left-color:var(--critical)}
+.lot-rules{margin-top:14px; font-size:13px; color:var(--ink2)}
+.lot-rules ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:6px}
+.lot-rules b{color:var(--ink)}
+
+/* ============ feed tier chips ============ */
+.mail-chips{display:flex; align-items:center; gap:7px; margin-top:7px; flex-wrap:wrap}
+.mail-chips .arr2{color:var(--muted); font-family:"Spline Sans Mono"; font-size:12px}
+
+/* ============ deposit engine ============ */
+.ladder{display:flex; flex-direction:column; gap:6px; margin-top:18px}
+.rung{display:grid; grid-template-columns:110px 1fr 86px; gap:10px; align-items:center;
+  font-family:"Spline Sans Mono"; font-size:12px; color:var(--muted); padding:7px 10px; border-radius:9px; border:1px solid transparent}
+.rung .bar{height:8px; border-radius:4px; background:var(--surface2); overflow:hidden}
+.rung .bar i{display:block; height:100%; border-radius:4px; background:var(--muted); opacity:.45}
+.rung.on{border-color:var(--border2); background:var(--surface2); color:var(--ink)}
+.rung.on .bar i{opacity:1}
+.rung .pct{text-align:right}
+
+/* ============ closing ============ */
+.close-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin-top:8px}
+.close-grid .panel p{font-size:14.5px; color:var(--ink2); margin:6px 0 0}
+footer{max-width:1140px; margin:40px auto 0; padding:28px 24px 48px; border-top:1px solid var(--border); font-family:"Spline Sans Mono"; font-size:12px; color:var(--muted); display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap}
+
+/* ============ tooltip ============ */
+#tip{position:fixed; z-index:99; pointer-events:none; background:var(--ink); color:var(--bg);
+  font-family:"Spline Sans Mono"; font-size:12px; line-height:1.5; padding:7px 10px; border-radius:8px;
+  opacity:0; transform:translateY(4px); transition:opacity .12s; max-width:260px; box-shadow:var(--shadow)}
+#tip.on{opacity:1}
+#tip b{font-weight:600}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important; transition:none!important}
+}
+</style>
+</head>
+<body>
+
+
+<nav class="nav" aria-label="Chapters">
+  <a class="brand" href="#top"><span class="mark">F</span>FloorSight</a>
+  <a class="ch" href="#risk"><b>01</b><span>The carry gap</span></a>
+  <a class="ch" href="#score"><b>02</b><span>The score</span></a>
+  <a class="ch" href="#portfolio"><b>03</b><span>Portfolio</span></a>
+  <a class="ch" href="#dealer"><b>04</b><span>Risk file</span></a>
+  <a class="ch" href="#collateral"><b>05</b><span>Lot check</span></a>
+  <a class="ch" href="#simulate"><b>06</b><span>Simulator</span></a>
+  <a class="ch" href="#alerts"><b>07</b><span>Alerts</span></a>
+  <a class="ch" href="#deposits"><b>08</b><span>Deposits</span></a>
+</nav>
+
+<!-- ============ 0 · HERO ============ -->
+<section class="hero" id="top">
+  <div class="eyebrow">Dealer risk intelligence for floorplan lenders</div>
+  <h1>Every dealer sells your collateral.<br>The question is <em>how long they keep your money.</em></h1>
+  <p class="sub">FloorSight scores every dealer on your floorplan line the way a bureau scores a borrower —
+    built around one number nobody else measures: <b style="color:var(--ink)">the days between a verified sale and the payoff hitting your account.</b></p>
+  <div class="hero-stats">
+    <div class="tile"><div class="k"><span class="dot" style="background:var(--accent)"></span>Portfolio outstanding</div><div class="v">$14.2M</div><div class="d">486 units · 8 dealers</div></div>
+    <div class="tile crit"><div class="k"><span class="dot" style="background:var(--critical)"></span>Sold &amp; unpaid past grace</div><div class="v">$612K</div><div class="d">17 units — your cash, their pocket</div></div>
+    <div class="tile"><div class="k"><span class="dot" style="background:var(--warning)"></span>Dealers on watch or worse</div><div class="v">4 of 8</div><div class="d">2 deteriorating this month</div></div>
+    <div class="tile"><div class="k"><span class="dot" style="background:var(--good)"></span>Median payoff velocity</div><div class="v">4.3 <span style="font-size:18px">days</span></div><div class="d">verified sale → payoff received</div></div>
+  </div>
+  <div class="scroll-hint">SCROLL ↓</div>
+</section>
+
+<!-- ============ 1 · CARRY GAP ============ -->
+<section id="risk">
+  <div class="eyebrow"><span class="n">01</span>The risk you can't see on a statement</div>
+  <h2>The carry gap: sold out of trust, one quiet day at a time</h2>
+  <p class="lede">You financed the car. The dealer sold it. Until the payoff arrives, the sale proceeds sit in the
+    dealer's account — <b>unsecured, invisible, and interest-free for them</b>. A dealer who "carries" every sale a few extra
+    days is permanently operating on your cash. When that float grows faster than their sales, you're the last to know — until now.</p>
+
+  <div class="panel">
+    <h3>Life of one floored unit</h3>
+    <p class="hint">Hover each stage. The red span is the gap that FloorSight measures on every unit, every day.</p>
+    <div class="lifecycle"><svg id="lifecycleSvg" width="1040" height="196" role="img" aria-label="Timeline of a floored car from advance to payoff, highlighting the carry gap between sale and payoff"></svg></div>
+    <div class="carry-note">
+      <span class="sev-ic" style="background:var(--critical)">!</span>
+      <div>In this example the payoff lands <b>14 days after the verified sale</b> — 12 days past grace. On a $19,800 unit,
+      that's $19,800 of the bank's money financing the dealer's operations, off the books, at 0%.</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <h3>The same sale, three dealers</h3>
+    <p class="hint">Days from independently verified sale to payoff received — last 90 days, per dealer. Bar = median, whisker = worst unit.</p>
+    <div class="lifecycle"><svg id="compareSvg" width="1040" height="230" role="img" aria-label="Comparison of payoff speed for three dealers"></svg></div>
+    <div class="legend">
+      <span class="li"><span class="sw sq" style="background:var(--good)"></span>inside grace (≤ 2 days)</span>
+      <span class="li"><span class="sw sq" style="background:var(--warning)"></span>carrying (3–7 days)</span>
+      <span class="li"><span class="sw sq" style="background:var(--critical)"></span>floating your cash (8+ days)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 · SCORE ============ -->
+<section id="score">
+  <div class="eyebrow"><span class="n">02</span>One number per dealer</div>
+  <h2>The Trust Score: a credit score for floorplan behavior</h2>
+  <p class="lede">Six behavioral factors, weighted by how much money they put at risk, compressed to a single
+    <b>300–850</b> score that moves daily. Payoff velocity dominates by design — it is the earliest, hardest-to-fake
+    signal of a dealer starting to lean on your cash.</p>
+
+  <div class="panel">
+    <div class="score-sel" id="scoreSel" role="tablist" aria-label="Score subject"></div>
+    <div class="score-wrap">
+      <div>
+        <svg id="gaugeSvg" width="340" height="230" role="img" aria-label="Trust score gauge"></svg>
+        <p class="hint" style="text-align:center; margin-top:2px" id="gaugeHint"></p>
+      </div>
+      <div>
+        <div id="factors"></div>
+        <div class="factor-detail" id="factorDetail"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 · PORTFOLIO ============ -->
+<section id="portfolio">
+  <div class="eyebrow"><span class="n">03</span>The morning screen</div>
+  <h2>Portfolio console — who do we worry about today?</h2>
+  <p class="lede">Every dealer, ranked by trust. The columns your credit committee actually argues about:
+    score trend, dollars sold-but-unpaid, and how long payoffs take. <b>Click any row</b> to open that dealer's risk file below.</p>
+
+  <div class="console-head">
+    <div class="legend">
+      <span class="li"><span class="chip prime">✓ PRIME</span></span>
+      <span class="li"><span class="chip standard">— STANDARD</span></span>
+      <span class="li"><span class="chip watch">▲ WATCH</span></span>
+      <span class="li"><span class="chip elevated">▲ ELEVATED</span></span>
+      <span class="li"><span class="chip critical">✖ CRITICAL</span></span>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table id="ptable" aria-label="Dealer portfolio ranked by trust score">
+      <thead><tr>
+        <th>Dealer</th>
+        <th class="sortable" data-k="score">Score<span class="arr" id="arr-score">↓</span></th>
+        <th>90-day trend</th>
+        <th class="sortable" data-k="units">Units<span class="arr" id="arr-units"></span></th>
+        <th class="sortable" data-k="outstanding">Outstanding<span class="arr" id="arr-outstanding"></span></th>
+        <th class="sortable" data-k="carried">Sold · unpaid<span class="arr" id="arr-carried"></span></th>
+        <th class="sortable" data-k="medDays">Payoff velocity<span class="arr" id="arr-medDays"></span></th>
+      </tr></thead>
+      <tbody id="ptbody"></tbody>
+    </table>
+  </div>
+  <p class="mini-note">Payoff velocity = median days from verified sale to payoff received. Sold · unpaid = balance on units with a verified sale and no payoff, past grace.</p>
+</section>
+
+<!-- ============ 4 · DEALER FILE ============ -->
+<section id="dealer">
+  <div class="eyebrow"><span class="n">04</span>Drill-down</div>
+  <h2>Dealer risk file</h2>
+  <p class="lede" id="fileLede"></p>
+
+  <div class="panel">
+    <div class="file-head">
+      <svg id="miniGauge" width="150" height="104" role="img" aria-label="Selected dealer score"></svg>
+      <div class="who">
+        <h3 id="fName"></h3>
+        <div class="meta" id="fMeta"></div>
+      </div>
+      <div style="margin-left:auto" id="fChip"></div>
+    </div>
+    <div class="kpis" id="fKpis"></div>
+    <div class="grid2">
+      <div>
+        <h3 style="font-size:15px">Days from verified sale → payoff <span style="color:var(--muted); font-weight:400">(units, last 90d)</span></h3>
+        <svg id="histSvg" width="500" height="210" style="max-width:100%"></svg>
+      </div>
+      <div>
+        <h3 style="font-size:15px">Floored inventory age <span style="color:var(--muted); font-weight:400">(units)</span></h3>
+        <svg id="agingSvg" width="500" height="210" style="max-width:100%"></svg>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:22px">
+      <div>
+        <h3 style="font-size:15px">Exposure vs. carried cash <span style="color:var(--muted); font-weight:400">(12 weeks)</span></h3>
+        <svg id="expoSvg" width="500" height="230" style="max-width:100%"></svg>
+        <div class="legend">
+          <span class="li"><span class="sw" style="background:var(--accent)"></span>outstanding line balance</span>
+          <span class="li"><span class="sw" style="background:var(--series-red)"></span>sold &amp; unpaid past grace</span>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:15px; margin-bottom:12px">Active risk alerts</h3>
+        <div class="alerts" id="fAlerts"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 · LOT CHECK ============ -->
+<section id="collateral">
+  <div class="eyebrow"><span class="n">05</span>Physical collateral</div>
+  <h2>Where is every car, right now?</h2>
+  <p class="lede">A floorplan loan is only as real as the car behind it. Field workers run tap-to-verify lot checks;
+    every unit is either <b>seen on the lot, verifiably sold, or explained</b> — a worker drove it, it's at the body shop,
+    it's in transit between lots. And every explanation has an expiry date: a unit nobody can produce feeds straight
+    into the Audit Integrity factor of the score.</p>
+
+  <div class="panel">
+    <div class="score-sel" id="lotSel" role="tablist" aria-label="Dealer lot"></div>
+    <div class="lot-wrap">
+      <div>
+        <div class="lot-chips" id="lotChips"></div>
+        <div class="lot-grid" id="lotGrid"></div>
+        <p class="mini-note" id="lotSummary"></p>
+      </div>
+      <div>
+        <div class="lot-detail" id="lotDetail"></div>
+        <div class="lot-rules">
+          <h3 style="font-size:14px; margin-bottom:8px">Audit rules</h3>
+          <ul>
+            <li><b>Seen</b> — tap-verified on the lot this cycle. Clock resets.</li>
+            <li><b>Sold</b> — payoff pending; past grace it counts as carried cash.</li>
+            <li><b>Explained</b> — body shop, transit, staff drive. Allowed, but ages: over 14 days it must be re-produced or escalated.</li>
+            <li><b>Unexplained</b> — missing at audit. Two consecutive misses = collateral event, score hit, immediate re-check.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6 · SIMULATOR ============ -->
+<section id="simulate">
+  <div class="eyebrow"><span class="n">06</span>Why velocity is the score</div>
+  <h2>Watch a good dealer go bad</h2>
+  <p class="lede">A healthy dealer, ~22 sales a month at an average payoff of <span class="mono">$18,400</span>.
+    Drag the slider: every extra day they sit on payoffs becomes a <b>permanent, revolving float of your money</b> —
+    and the score reacts before the monthly statement ever could.</p>
+
+  <div class="panel">
+    <div class="sim">
+      <div class="sim-controls">
+        <label for="carrySlider">Average days this dealer holds each payoff after a verified sale</label>
+        <input type="range" id="carrySlider" min="1" max="21" step="1" value="2" aria-describedby="simVerdict">
+        <div class="sim-read"><span>1 day (same-day wire)</span><span id="carryVal" style="color:var(--ink); font-weight:600">2 days</span><span>21 days</span></div>
+        <div class="sim-out">
+          <div class="sim-line"><span>Bank cash permanently floating in the dealer's account</span><span class="v" id="simFloat"></span></div>
+          <div class="sim-line"><span>Units sold-but-unpaid on any given day</span><span class="v" id="simUnits"></span></div>
+          <div class="sim-line"><span>Trust Score</span><span class="v" id="simScore"></span></div>
+          <div class="sim-line"><span>Risk tier</span><span id="simTier"></span></div>
+        </div>
+        <div class="sim-verdict" id="simVerdict"></div>
+      </div>
+      <div>
+        <svg id="simGauge" width="360" height="240" style="max-width:100%" role="img" aria-label="Simulated trust score gauge"></svg>
+        <svg id="simFloatSvg" width="360" height="120" style="max-width:100%" role="img" aria-label="Floating cash versus days carried"></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7 · ALERT FEED ============ -->
+<section id="alerts">
+  <div class="eyebrow"><span class="n">07</span>The push you actually read</div>
+  <h2>Alerts follow the dealer's state — not every car</h2>
+  <p class="lede">The desk doesn't need forty messages about individual cars. FloorSight pushes when a
+    <b>dealer's state changes</b> — a tier move, velocity drifting, exposure spiking, an audit flag, a recovery —
+    and every message carries the dealer's cash position and what the system did about it. Replay a typical week below.</p>
+
+  <div class="panel">
+    <div class="feed-wrap">
+      <div>
+        <div class="tile feed-counter">
+          <div class="k"><span class="dot" style="background:var(--critical)"></span>Bank cash in dealers' hands</div>
+          <div class="v" id="feedFloat">$612K</div>
+          <div class="d" id="feedSub">live · updates with every event</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="feedPlay">▶ Replay the week</button>
+          <button class="btn" id="feedStep">Step</button>
+          <button class="btn" id="feedReset">Reset</button>
+        </div>
+        <p class="mini-note">One message per dealer state change. Red deltas mean the dealer's float grew;
+          green means cash came back to the bank. Tier moves, freezes and deposit calls fire automatically from the score.</p>
+      </div>
+      <div class="inbox" id="inbox" aria-live="polite">
+        <div class="inbox-empty">Press <b>Replay the week</b> to stream the notifications.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8 · DEPOSIT ENGINE ============ -->
+<section id="deposits">
+  <div class="eyebrow"><span class="n">08</span>Self-insurance</div>
+  <h2>Risk-priced deposits: the dealer's cash covers the dealer's float</h2>
+  <p class="lede">A dealer averaging <span class="mono">$250K</span> of monthly sales cash flow who carries payoffs
+    six days is, in effect, holding a permanent <b>~$50K interest-free loan the bank never approved</b>. FloorSight sizes a
+    <b>refundable security deposit to exactly that float</b> — the dealer's own money absorbs the risk the dealer creates,
+    and it's released back as the score recovers. The bank's uncovered exposure trends to zero; the dealer has a
+    direct financial incentive to pay off faster.</p>
+
+  <div class="panel">
+    <div class="sim">
+      <div class="sim-controls">
+        <label for="depCf">Dealer's average monthly sales cash flow</label>
+        <input type="range" id="depCf" min="50" max="600" step="10" value="250">
+        <div class="sim-read"><span>$50K</span><span id="depCfVal" style="color:var(--ink); font-weight:600">$250K</span><span>$600K</span></div>
+        <label for="depScore" style="margin-top:22px">Dealer's current Trust Score</label>
+        <input type="range" id="depScore" min="300" max="850" step="1" value="596">
+        <div class="sim-read"><span>300</span><span id="depScoreVal" style="color:var(--ink); font-weight:600">596</span><span>850</span></div>
+        <div class="ladder" id="depLadder"></div>
+      </div>
+      <div>
+        <div class="sim-out" style="margin-top:0">
+          <div class="sim-line"><span>Typical carry behavior at this score</span><span class="v" id="depDays"></span></div>
+          <div class="sim-line"><span>Expected cash floating with the dealer</span><span class="v" id="depFloat"></span></div>
+          <div class="sim-line"><span>Required security deposit</span><span class="v" id="depDep"></span></div>
+          <div class="sim-line"><span>Bank's uncovered exposure</span><span class="v" id="depUnc"></span></div>
+        </div>
+        <svg id="depSvg" width="360" height="130" style="max-width:100%; margin-top:14px" role="img" aria-label="Expected float versus required deposit"></svg>
+        <div class="sim-verdict" id="depVerdict"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9 · CLOSE ============ -->
+<section id="close">
+  <div class="eyebrow"><span class="n">09</span>What this buys the bank</div>
+  <h2>From gut feel to a defensible number</h2>
+  <div class="close-grid">
+    <div class="panel"><h3>Earlier than the audit</h3><p>Field audits catch a dealer out of trust weeks after the fact. Payoff-velocity drift shows up in the score within days of the first carried sale.</p></div>
+    <div class="panel"><h3>Priced, not guessed</h3><p>Tie credit-line size, curtailment terms, and audit frequency to the score. Prime dealers earn headroom; deteriorating dealers earn attention — automatically.</p></div>
+    <div class="panel"><h3>Committee-ready</h3><p>Every score decomposes into six audited factors with the underlying events attached. When you cut a line, the file explains itself.</p></div>
+    <div class="panel"><h3>Portfolio, not anecdotes</h3><p>One screen answers the morning question — <i>who do we worry about today, and how much of our money are they holding?</i></p></div>
+  </div>
+</section>
+
+<footer>
+  <span>FloorSight · Dealer Risk Intelligence</span>
+  <span>All dealers, figures and events on this page are illustrative.</span>
+</footer>
+
+<div id="tip" role="presentation"></div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function el(name, attrs, parent){ const e = document.createElementNS(NS, name); for(const k in attrs) e.setAttribute(k, attrs[k]); if(parent) parent.appendChild(e); return e; }
+const fmt$ = n => n >= 1e6 ? "$"+(n/1e6).toFixed(2)+"M" : "$"+Math.round(n/1e3)+"K";
+const fmtN = n => n.toLocaleString("en-US");
+
+/* tooltip */
+const tip = $("#tip");
+function showTip(html, x, y){ tip.innerHTML = html; tip.classList.add("on");
+  const w = tip.offsetWidth; let left = x + 14; if(left + w > innerWidth - 10) left = x - w - 14;
+  tip.style.left = left + "px"; tip.style.top = Math.max(8, y - 14) + "px"; }
+function hideTip(){ tip.classList.remove("on"); }
+
+/* theme-reactive redraw (colors are read from CSS at draw time) */
+const mq = matchMedia("(prefers-color-scheme: dark)");
+
+/* ---------- invented demo data ---------- */
+const TIERS = {
+  prime:    {label:"PRIME",    icon:"✓", cls:"prime"},
+  standard: {label:"STANDARD", icon:"—", cls:"standard"},
+  watch:    {label:"WATCH",    icon:"▲", cls:"watch"},
+  elevated: {label:"ELEVATED", icon:"▲", cls:"elevated"},
+  critical: {label:"CRITICAL", icon:"✖", cls:"critical"},
+};
+function tierOf(score){ return score>=740?"prime":score>=650?"standard":score>=560?"watch":score>=480?"elevated":"critical"; }
+function tierChip(score){ const t = TIERS[tierOf(score)]; return `<span class="chip ${t.cls}">${t.icon} ${t.label}</span>`; }
+
+/* hist buckets: days sale→payoff  [0–2, 3–5, 6–8, 9–14, 15+] · aging: [0–30, 31–60, 61–90, 90+] */
+const DEALERS = [
+  { id:"meridian", name:"Meridian Motors", code:"MER-102", city:"Columbus OH", line:1200000, score:792, delta:+6,
+    units:41, outstanding:842000, carried:0, carriedUnits:0, medDays:1.8, worstDays:3,
+    trend:[779,781,780,784,786,785,788,790,789,791,790,792],
+    hist:[15,4,1,0,0], aging:[26,9,4,2],
+    expo:[81,84,80,86,83,85,88,84,86,85,84,84.2], carriedW:[0,0,.4,0,0,0,.6,0,0,0,0,0],
+    alerts:[{sev:"good", t:"No open risk events", m:"last incident 74 days ago · resolved in 1 day"}] },
+  { id:"crown", name:"Crown City Auto", code:"CRN-221", city:"Cincinnati OH", line:900000, score:761, delta:+2,
+    units:34, outstanding:701000, carried:18000, carriedUnits:1, medDays:2.2, worstDays:5,
+    trend:[756,758,755,759,760,758,761,760,762,760,761,761],
+    hist:[11,5,1,0,0], aging:[19,10,4,1],
+    expo:[66,69,71,68,70,72,69,71,70,72,70,70.1], carriedW:[0,.3,0,0,.5,0,0,.2,0,0,0,1.8],
+    alerts:[{sev:"warning", t:"1 unit at 4 days past verified sale", m:"2023 Honda CR-V · $18.0K payoff pending"}] },
+  { id:"lakeside", name:"Lakeside Auto Group", code:"LKS-090", city:"Cleveland OH", line:1500000, score:718, delta:-4,
+    units:52, outstanding:1104000, carried:41000, carriedUnits:2, medDays:3.1, worstDays:7,
+    trend:[731,730,728,729,726,727,724,722,723,720,719,718],
+    hist:[9,8,3,0,0], aging:[28,14,7,3],
+    expo:[102,106,109,111,108,112,110,113,111,110,112,110.4], carriedW:[1.1,0,2.0,.8,1.4,2.6,1.9,3.1,2.2,3.4,2.9,4.1],
+    alerts:[{sev:"warning", t:"Payoff velocity slipping 4 weeks straight", m:"median 2.2d → 3.1d over 30 days"},
+            {sev:"warning", t:"Curtailment due in 3 days on 6 units", m:"$8.4K combined · historically pays on time"}] },
+  { id:"bluestone", name:"BlueStone Motors", code:"BLU-317", city:"Dayton OH", line:800000, score:684, delta:+1,
+    units:29, outstanding:588000, carried:22000, carriedUnits:1, medDays:3.4, worstDays:6,
+    trend:[678,680,679,682,681,683,682,684,683,685,684,684],
+    hist:[7,7,2,0,0], aging:[15,8,4,2],
+    expo:[55,57,59,56,58,60,57,59,58,60,59,58.8], carriedW:[.9,1.2,.6,1.8,1.1,.9,1.6,1.2,2.0,1.4,1.8,2.2],
+    alerts:[{sev:"warning", t:"1 unit unpaid 5 days after verified sale", m:"2021 Ford Escape · $22.1K"},
+            {sev:"info", t:"2 units crossed 90-day aging", m:"curtailment cycle 2 begins next week"}] },
+  { id:"route9", name:"Route 9 Motors", code:"RT9-455", city:"Toledo OH", line:1000000, score:631, delta:-19,
+    units:47, outstanding:912000, carried:74000, carriedUnits:3, medDays:4.8, worstDays:9,
+    trend:[672,670,668,665,661,659,655,650,646,641,636,631],
+    hist:[5,8,5,2,0], aging:[20,13,8,6],
+    expo:[84,87,89,92,90,93,91,94,92,93,91,91.2], carriedW:[2.1,2.8,3.4,3.0,4.2,4.8,5.5,5.1,6.2,6.8,7.0,7.4],
+    alerts:[{sev:"serious", t:"3 units unpaid past grace — oldest 9 days", m:"$74K combined · pattern began 6 weeks ago"},
+            {sev:"warning", t:"Score fell 41 points in 90 days", m:"fastest deterioration in portfolio"},
+            {sev:"warning", t:"90+ day bucket grew 3 weeks in a row", m:"6 units · 13% of floor"}] },
+  { id:"harbor", name:"Harbor Auto Exchange", code:"HBR-533", city:"Sandusky OH", line:700000, score:596, delta:-8,
+    units:31, outstanding:566000, carried:87000, carriedUnits:4, medDays:5.9, worstDays:12,
+    trend:[622,619,620,616,613,614,610,607,604,601,598,596],
+    hist:[3,6,5,3,1], aging:[11,9,7,4],
+    expo:[51,53,55,54,56,58,56,57,58,57,57,56.6], carriedW:[3.2,2.9,4.1,3.8,4.6,5.2,4.9,6.1,6.8,7.2,7.9,8.7],
+    alerts:[{sev:"serious", t:"4 units unpaid past grace — oldest 12 days", m:"$87K combined"},
+            {sev:"serious", t:"1 unit not found at last lot audit", m:"location unverified 11 days · flagged for re-check"},
+            {sev:"warning", t:"2 curtailment payments late this cycle", m:"paid 4 and 6 days after due"}] },
+  { id:"pinnacle", name:"Pinnacle Auto Sales", code:"PIN-208", city:"Akron OH", line:900000, score:547, delta:-12,
+    units:38, outstanding:734000, carried:58000, carriedUnits:2, medDays:6.5, worstDays:15,
+    trend:[583,580,578,574,571,569,566,562,558,554,550,547],
+    hist:[2,5,6,3,1], aging:[12,11,9,6],
+    expo:[68,70,72,71,73,75,73,74,75,74,73,73.4], carriedW:[3.8,4.4,4.1,5.2,4.8,5.9,5.4,6.6,6.1,7.0,6.4,5.8],
+    alerts:[{sev:"serious", t:"Payoff on 2019 RAM 1500 took 15 days", m:"$31.2K · longest carry in portfolio this quarter"},
+            {sev:"serious", t:"Canceled deal after verified sale", m:"unit returned to floor 8 days post-sale · 2nd this quarter"},
+            {sev:"warning", t:"16% of floor past 90 days", m:"6 units on 3rd curtailment cycle"}] },
+  { id:"summit", name:"Summit Wholesale Autos", code:"SMT-664", city:"Youngstown OH", line:800000, score:471, delta:-26,
+    units:36, outstanding:679000, carried:312000, carriedUnits:7, medDays:11.4, worstDays:19,
+    trend:[561,554,549,543,536,530,522,513,504,494,483,471],
+    hist:[1,2,4,6,4], aging:[9,10,9,8],
+    expo:[58,61,63,66,64,67,66,68,67,68,68,67.9], carriedW:[6.2,7.8,9.4,11.2,13.6,15.9,18.4,21.2,24.0,26.8,29.4,31.2],
+    alerts:[{sev:"critical", t:"7 units sold & unpaid — oldest 19 days", m:"$312K combined · 46% of outstanding balance"},
+            {sev:"critical", t:"Carried cash doubled in 6 weeks", m:"$156K → $312K while sales volume flat"},
+            {sev:"serious", t:"2 units unverified at last two lot audits", m:"$43K balance · location unknown 23 days"},
+            {sev:"warning", t:"Curtailment paid with uncleared check", m:"$4.1K · 2nd occurrence this cycle"}] },
+];
+
+const FACTORS = [
+  { name:"Payoff velocity", w:35, fill:.35,
+    d:"<b>Median and tail of days from a verified sale to the payoff hitting the bank.</b> The earliest honest signal of trouble: a dealer under cash pressure carries payoffs before they miss anything else. Sale events are verified independently of what the dealer reports — the clock starts whether or not they tell you." },
+  { name:"Carry exposure", w:20, fill:.20,
+    d:"<b>Dollars currently sold-but-unpaid past grace, relative to the credit line.</b> Velocity says how they behave; exposure says how much of your money is at stake right now. Seven fast small carries can be safer than one slow $60K truck." },
+  { name:"Inventory aging", w:15, fill:.15,
+    d:"<b>Share of the floor past 90 days, and repeat curtailment cycles per unit.</b> Stale inventory is tomorrow's carry problem: units that don't sell get sold cheap and paid off slow — or quietly disappear from the lot." },
+  { name:"Curtailment discipline", w:15, fill:.15,
+    d:"<b>On-time principal paydowns, clean funds.</b> Late curtailments and payments made with slow-clearing checks are classic pre-default behavior — the dealer is buying days." },
+  { name:"Audit integrity", w:10, fill:.10,
+    d:"<b>Physical lot-check hit rate.</b> Every unit is either seen on the lot, verifiably sold, or a problem. Units missing at consecutive audits and deals canceled after a verified sale hit this factor hard." },
+  { name:"Trajectory", w:5, fill:.05,
+    d:"<b>Direction and volatility over 90 days.</b> A 620 climbing from 560 is a different conversation than a 620 falling from 700. The trend term makes the score lead, not lag." },
+];
+
+/* ---------- palette getters (read at draw time so theme swaps re-render correctly) ---------- */
+const P = () => ({
+  accent: css("--accent"), accentInk: css("--accent-ink"), ink: css("--ink"), ink2: css("--ink2"),
+  muted: css("--muted"), grid: css("--grid"), surface: css("--surface"), surface2: css("--surface2"),
+  good: css("--good"), goodText: css("--good-text"), warning: css("--warning"),
+  serious: css("--serious"), critical: css("--critical"), red: css("--series-red"),
+});
+
+/* ---------- 1 · lifecycle diagram ---------- */
+function drawLifecycle(){
+  const svg = $("#lifecycleSvg"); svg.innerHTML = ""; const p = P();
+  const W = 1040, x0 = 60, x1 = W - 60, y = 100;
+  const days = 80, X = d => x0 + (x1 - x0) * d / days;
+  /* `lift` raises a marker's caption to an upper tier so near-neighbours (day 62/64) never collide */
+  const stages = [
+    { d:0,  label:"Day 0",  sub:"Advance funded", tip:"<b>Day 0 — advance funded</b><br>Bank wires $19,800. The car is collateral on the floor.", c:p.accent },
+    { d:62, label:"Day 62", sub:"Sale verified",  tip:"<b>Day 62 — sale verified</b><br>An independent sale signal confirms the unit changed hands. The dealer has the buyer's money. The carry clock starts.", c:p.warning },
+    { d:64, label:"Day 64", sub:"Grace ends", lift:true, tip:"<b>Day 64 — grace period ends</b><br>Contractual payoff window (2 days) closes. From here the dealer is out of trust.", c:p.serious },
+    { d:76, label:"Day 76", sub:"Payoff received",tip:"<b>Day 76 — payoff received</b><br>$19,800 finally lands — 14 days after the sale, 12 past grace.", c:p.critical },
+  ];
+  /* base track: on-floor period */
+  el("line",{x1:X(0),y1:y,x2:X(62),y2:y,stroke:p.grid,"stroke-width":10,"stroke-linecap":"round"},svg);
+  /* grace segment */
+  el("line",{x1:X(62),y1:y,x2:X(64),y2:y,stroke:p.warning,"stroke-width":10,"stroke-linecap":"butt"},svg);
+  /* carry segment */
+  const carry = el("line",{x1:X(64),y1:y,x2:X(76),y2:y,stroke:p.critical,"stroke-width":10,"stroke-linecap":"round"},svg);
+  carry.style.cursor="crosshair";
+  carry.addEventListener("mousemove",e=>showTip("<b>The carry gap — 12 days out of trust</b><br>Sale proceeds sit in the dealer's account. This span, summed across every unit, is the number the score is built on.",e.clientX,e.clientY));
+  carry.addEventListener("mouseleave",hideTip);
+  /* on-floor label */
+  el("text",{x:X(31),y:y-26,fill:p.muted,"font-size":11,"text-anchor":"middle"},svg).textContent = "ON THE FLOOR · 62 DAYS · COLLATERAL VERIFIED AT AUDITS";
+  el("text",{x:(X(64)+X(76))/2,y:y+34,fill:p.critical,"font-size":12,"font-weight":600,"text-anchor":"middle"},svg).textContent = "◀ 12 DAYS CARRIED ▶";
+  el("text",{x:(X(64)+X(76))/2,y:y+52,fill:p.ink2,"font-size":11,"text-anchor":"middle"},svg).textContent = "$19,800 of bank cash in the dealer's account";
+  stages.forEach(s=>{
+    const g = el("g",{},svg); g.style.cursor="crosshair";
+    el("circle",{cx:X(s.d),cy:y,r:9,fill:s.c,stroke:p.surface,"stroke-width":2.5},g);
+    if(s.lift){
+      /* upper tier: leader line + stacked caption, clear of the day-62 marker */
+      el("line",{x1:X(s.d),y1:y-14,x2:X(s.d),y2:y-46,stroke:p.muted,"stroke-width":1,"stroke-dasharray":"2 3"},g);
+      el("text",{x:X(s.d),y:y-70,fill:p.ink,"font-size":12,"font-weight":600,"text-anchor":"middle"},g).textContent = s.label;
+      el("text",{x:X(s.d),y:y-54,fill:p.ink2,"font-size":11,"text-anchor":"middle"},g).textContent = s.sub;
+    }else{
+      el("text",{x:X(s.d),y:y-40,fill:p.ink,"font-size":12,"font-weight":600,"text-anchor":"middle"},g).textContent = s.label;
+      el("text",{x:X(s.d),y:y+74,fill:p.ink2,"font-size":11,"text-anchor":"middle"},g).textContent = s.sub;
+    }
+    el("circle",{cx:X(s.d),cy:y,r:20,fill:"transparent"},g); /* big hit target */
+    g.addEventListener("mousemove",e=>showTip(s.tip,e.clientX,e.clientY));
+    g.addEventListener("mouseleave",hideTip);
+  });
+}
+
+/* ---------- 1b · three dealers compared ---------- */
+function drawCompare(){
+  const svg = $("#compareSvg"); svg.innerHTML = ""; const p = P();
+  const rows = [
+    { name:"Meridian Motors", tier:"792 · PRIME", med:1.8, worst:3,  amt:"$0 carried" ,cMain:p.good },
+    { name:"Route 9 Motors",  tier:"631 · WATCH", med:4.8, worst:9,  amt:"$74K carried", cMain:p.warning },
+    { name:"Summit Wholesale",tier:"471 · CRITICAL", med:11.4, worst:19, amt:"$312K carried", cMain:p.critical },
+  ];
+  const W=1040, x0=210, x1=W-120, maxD=20, X=d=>x0+(x1-x0)*d/maxD;
+  /* axis + grid */
+  [0,2,5,10,15,20].forEach(d=>{
+    el("line",{x1:X(d),y1:24,x2:X(d),y2:186,stroke:p.grid,"stroke-width":1},svg);
+    el("text",{x:X(d),y:202,fill:p.muted,"font-size":11,"text-anchor":"middle"},svg).textContent = d===0?"sale":d+"d";
+  });
+  /* grace line */
+  el("line",{x1:X(2),y1:20,x2:X(2),y2:186,stroke:p.serious,"stroke-width":1.5,"stroke-dasharray":"4 4"},svg);
+  el("text",{x:X(2),y:14,fill:p.serious,"font-size":10.5,"text-anchor":"middle"},svg).textContent="GRACE ENDS";
+  rows.forEach((r,i)=>{
+    const y=52+i*52;
+    el("text",{x:x0-14,y:y-6,fill:p.ink,"font-size":13,"font-weight":600,"text-anchor":"end"},svg).textContent=r.name;
+    el("text",{x:x0-14,y:y+11,fill:p.muted,"font-size":10.5,"text-anchor":"end"},svg).textContent=r.tier;
+    /* whisker to worst */
+    el("line",{x1:X(0),y1:y,x2:X(r.worst),y2:y,stroke:p.grid,"stroke-width":2},svg);
+    el("line",{x1:X(r.worst),y1:y-7,x2:X(r.worst),y2:y+7,stroke:p.muted,"stroke-width":2},svg);
+    /* median bar */
+    const bar = el("rect",{x:X(0),y:y-8,width:Math.max(6,X(r.med)-X(0)),height:16,rx:4,fill:r.cMain,stroke:p.surface,"stroke-width":2},svg);
+    bar.style.cursor="crosshair";
+    bar.addEventListener("mousemove",e=>showTip(`<b>${r.name}</b><br>median ${r.med}d · worst unit ${r.worst}d<br>${r.amt} past grace today`,e.clientX,e.clientY));
+    bar.addEventListener("mouseleave",hideTip);
+    /* two label tiers — median above the bar, worst below the whisker — so close values never collide */
+    el("text",{x:X(r.med)+8,y:y-13,fill:p.ink,"font-size":12,"font-weight":600},svg).textContent=r.med+"d median";
+    el("text",{x:X(r.worst)+8,y:y+20,fill:p.muted,"font-size":11},svg).textContent="worst "+r.worst+"d";
+  });
+}
+
+/* ---------- gauge ---------- */
+function drawGauge(svgSel, score, opts={}){
+  const svg = typeof svgSel==="string" ? $(svgSel) : svgSel; svg.innerHTML=""; const p=P();
+  const W = +svg.getAttribute("width"), H = +svg.getAttribute("height");
+  const cx=W/2, cy=H-(opts.small?14:40), R=Math.min(W/2-(opts.small?14:34), H-(opts.small?26:70));
+  /* param angle t: 0 → left end (180°), 1 → right end (0°); every span ≤ 180° so large-arc is always 0 */
+  const arc=(r,f0,f1)=>{
+    const pt=t=>[cx+r*Math.cos(Math.PI*(1-t)), cy-r*Math.sin(Math.PI*(1-t))];
+    const [ax,ay]=pt(f0),[bx,by]=pt(f1);
+    return `M ${ax} ${ay} A ${r} ${r} 0 0 1 ${bx} ${by}`; };
+  const frac = Math.min(1,Math.max(0,(score-300)/(850-300)));
+  const bands=[[0,.327,p.critical],[.327,.473,p.serious],[.473,.636,p.warning],[.636,.8,p.accent],[.8,1,p.good]];
+  bands.forEach(([f0,f1,c])=>el("path",{d:arc(R,f0+0.004,f1-0.004),stroke:c,"stroke-width":opts.small?7:10,fill:"none",opacity:.28,"stroke-linecap":"butt"},svg));
+  el("path",{d:arc(R,0,Math.max(.02,frac)),stroke:tierColor(score,p),"stroke-width":opts.small?7:10,fill:"none","stroke-linecap":"round"},svg);
+  /* ticks */
+  if(!opts.small)[300,450,560,650,740,850].forEach(v=>{
+    const f=(v-300)/550, t=Math.PI*(1-f);
+    const x=cx+(R+16)*Math.cos(t), y=cy-(R+16)*Math.sin(t);
+    el("text",{x,y:y+4,fill:p.muted,"font-size":10.5,"text-anchor":"middle"},svg).textContent=v;
+  });
+  const st=el("text",{x:cx,y:cy-(opts.small?6:22),fill:p.ink,"font-size":opts.small?30:52,"font-weight":800,"text-anchor":"middle","font-family":"Archivo"},svg);
+  st.textContent=Math.round(score);
+  if(opts.interactive) st.setAttribute("class","gscore");
+  if(!opts.small){
+    const t=TIERS[tierOf(score)];
+    el("text",{x:cx,y:cy+2,fill:tierColor(score,p),"font-size":13,"font-weight":600,"text-anchor":"middle","letter-spacing":"2"},svg).textContent=t.icon+" "+t.label;
+    el("text",{x:cx,y:cy+22,fill:p.muted,"font-size":11,"text-anchor":"middle"},svg).textContent="DEALER TRUST SCORE · 300–850";
+  }
+}
+function tierColor(score,p){ const t=tierOf(score); return t==="prime"?p.good:t==="standard"?p.accent:t==="watch"?p.warning:t==="elevated"?p.serious:p.critical; }
+
+/* ---------- score subject: gauge + per-dealer factor grades ---------- */
+let selFactor = 0, scoreSel = 0;
+/* Factor grades (0–100) derived from each dealer's own numbers, so the anatomy
+   panel shows WHY a dealer scores what they score — not a static weight chart. */
+function gradesOf(d){
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,Math.round(v)));
+  return [
+    clamp(105 - d.medDays*7.5, 5, 98),           /* payoff velocity: fast payoffs → high grade */
+    clamp(95 - (d.carried/d.line)*230, 5, 95),   /* carry exposure vs credit line */
+    clamp(95 - (d.aging[3]/d.units)*350, 5, 95), /* share of floor past 90 days */
+    clamp((d.score-350)/5, 10, 95),              /* curtailment discipline */
+    clamp((d.score-330)/5.4, 10, 95),            /* audit integrity */
+    clamp(60 + d.delta*1.6, 5, 95),              /* trajectory: 90-day score delta */
+  ];
+}
+const PORTFOLIO=(()=>{ const tot=DEALERS.reduce((s,d)=>s+d.outstanding,0);
+  const grades=[0,1,2,3,4,5].map(i=>Math.round(DEALERS.reduce((s,d)=>s+gradesOf(d)[i]*d.outstanding,0)/tot));
+  return {id:"portfolio", name:"Whole portfolio", code:"PORTFOLIO", score:662, grades};})();
+const SCORE_SEQ=[PORTFOLIO, ...DEALERS];
+const gradeColor=(g,p)=> g>=75?p.good : g>=55?p.accent : g>=35?p.warning : p.critical;
+function scoreSubject(){ const s=SCORE_SEQ[scoreSel]; return {...s, grades:s.grades||gradesOf(s)}; }
+function renderScore(){
+  const cur=scoreSubject();
+  const sel=$("#scoreSel"); sel.innerHTML="";
+  SCORE_SEQ.forEach((s,i)=>{ const b=document.createElement("button");
+    b.className=i===scoreSel?"on":""; b.textContent=s.id==="portfolio"?"PORTFOLIO":s.code;
+    b.title=s.name; b.setAttribute("aria-pressed",i===scoreSel);
+    b.addEventListener("click",()=>{scoreSel=i; renderScore();}); sel.appendChild(b); });
+  drawGauge("#gaugeSvg",cur.score,{interactive:true});
+  $("#gaugeHint").textContent = cur.id==="portfolio"
+    ? "Outstanding-weighted blend of all 8 dealers · click the score to step through them"
+    : cur.name+" · click the score for the next dealer";
+  const st=$("#gaugeSvg .gscore");
+  if(st){
+    st.setAttribute("tabindex","0"); st.setAttribute("role","button");
+    st.setAttribute("aria-label","Trust score "+cur.score+" for "+cur.name+" — activate for next subject");
+    const next=()=>{scoreSel=(scoreSel+1)%SCORE_SEQ.length; renderScore();};
+    st.addEventListener("click",next);
+    st.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();next();}});
+    st.addEventListener("mousemove",e=>showTip(cur.id==="portfolio"
+      ? "<b>Whole portfolio · "+cur.score+"</b><br>weighted by outstanding balance<br>click to step through dealers"
+      : `<b>${cur.name}</b><br>${cur.score} · ${TIERS[tierOf(cur.score)].label}<br>click for the next dealer`,e.clientX,e.clientY));
+    st.addEventListener("mouseleave",hideTip);
+  }
+  renderFactors();
+}
+function renderFactors(){
+  const cur=scoreSubject(); const p=P();
+  const box=$("#factors"); box.innerHTML="";
+  FACTORS.forEach((f,i)=>{
+    const g=cur.grades[i];
+    const b=document.createElement("button"); b.className="factor"+(i===selFactor?" sel":"");
+    b.setAttribute("aria-expanded", i===selFactor);
+    b.innerHTML=`<span class="fname">${f.name}</span>
+      <span class="bar"><i style="width:${g}%; background:${gradeColor(g,p)}"></i></span>
+      <span class="w"><b>${g}</b><span>w ${f.w}%</span></span>`;
+    b.addEventListener("click",()=>{selFactor=i; renderFactors();});
+    box.appendChild(b);
+  });
+  const g=cur.grades[selFactor];
+  $("#factorDetail").innerHTML = FACTORS[selFactor].d +
+    `<div class="fd-grade">${cur.id==="portfolio"?"Portfolio":cur.name} grades <b style="color:${gradeColor(g,p)}">${g}/100</b> on this factor · weight ${FACTORS[selFactor].w}% of the score</div>`;
+}
+
+/* ---------- portfolio table ---------- */
+let sortKey="score", sortDir=1; /* 1 = desc for score, asc handled per key */
+let selDealer = "summit";
+function renderTable(){
+  const tb=$("#ptbody"); tb.innerHTML="";
+  const rows=[...DEALERS].sort((a,b)=>{
+    const va=a[sortKey], vb=b[sortKey];
+    /* score: high first; medDays/carried: high first when toggled the same way */
+    return sortDir*(vb-va);
+  });
+  document.querySelectorAll("th.sortable .arr").forEach(a=>a.textContent="");
+  const arr=$("#arr-"+sortKey); if(arr) arr.textContent = sortDir===1?"↓":"↑";
+  rows.forEach(d=>{
+    const tr=document.createElement("tr"); if(d.id===selDealer) tr.className="sel";
+    tr.tabIndex=0; tr.setAttribute("role","button"); tr.setAttribute("aria-label","Open risk file for "+d.name);
+    const dl = d.delta>=0?`<span class="delta up">▲${d.delta}</span>`:`<span class="delta down">▼${Math.abs(d.delta)}</span>`;
+    tr.innerHTML=`
+      <td class="dealer-cell"><b>${d.name}</b><span>${d.code} · ${d.city}</span></td>
+      <td><span class="score-cell">${d.score}</span>${dl}<div style="margin-top:2px">${tierChip(d.score)}</div></td>
+      <td><svg class="spark" data-id="${d.id}" width="110" height="34"></svg></td>
+      <td class="num">${d.units}</td>
+      <td class="num">${fmt$(d.outstanding)}</td>
+      <td class="num" style="${d.carried>50000?'color:var(--critical);font-weight:600':''}">${d.carried?fmt$(d.carried):"—"}<br><span style="font-size:11px;color:var(--muted)">${d.carriedUnits?d.carriedUnits+" units":""}</span></td>
+      <td class="num" style="${d.medDays>6?'color:var(--critical);font-weight:600':d.medDays>3.5?'color:color-mix(in srgb,var(--warning) 70%,var(--ink));font-weight:600':''}">${d.medDays.toFixed(1)}d</td>`;
+    const open=()=>{ selDealer=d.id; renderTable(); renderDealerFile(); $("#dealer").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); };
+    tr.addEventListener("click",open);
+    tr.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} });
+    tb.appendChild(tr);
+  });
+  document.querySelectorAll(".spark").forEach(s=>drawSpark(s, DEALERS.find(d=>d.id===s.dataset.id)));
+}
+function drawSpark(svg, d){
+  svg.innerHTML=""; const p=P(); const W=110,H=34,pad=3;
+  const vals=d.trend, min=Math.min(...vals)-4, max=Math.max(...vals)+4;
+  const X=i=>pad+(W-2*pad)*i/(vals.length-1), Y=v=>H-pad-(H-2*pad)*(v-min)/(max-min);
+  const c = d.delta>=0 ? p.accent : (d.score<560?p.critical:p.warning);
+  const pts=vals.map((v,i)=>`${X(i)},${Y(v)}`).join(" ");
+  el("polyline",{points:`${X(0)},${H-pad} ${pts} ${X(vals.length-1)},${H-pad}`,fill:c,opacity:.12,stroke:"none"},svg);
+  el("polyline",{points:pts,fill:"none",stroke:c,"stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round"},svg);
+  el("circle",{cx:X(vals.length-1),cy:Y(vals.at(-1)),r:3,fill:c,stroke:p.surface,"stroke-width":1.5},svg);
+}
+document.querySelectorAll("th.sortable").forEach(th=>{
+  th.addEventListener("click",()=>{ const k=th.dataset.k;
+    if(sortKey===k) sortDir*=-1; else {sortKey=k; sortDir=1;}
+    renderTable(); });
+});
+
+/* ---------- dealer file ---------- */
+function renderDealerFile(){
+  const d = DEALERS.find(x=>x.id===selDealer); const p=P();
+  $("#fileLede").innerHTML = `Currently open: <b>${d.name}</b>. Every chart below is the evidence behind the ${d.score} — the same file your credit committee sees when a line gets cut or extended.`;
+  $("#fName").textContent = d.name;
+  $("#fMeta").textContent = `${d.code} · ${d.city} · line ${fmt$(d.line)} · ${d.units} units floored`;
+  $("#fChip").innerHTML = tierChip(d.score) + `<div class="mini-note" style="text-align:right">90-day change: <span class="${d.delta>=0?'delta up':'delta down'}">${d.delta>=0?'▲':'▼'}${Math.abs(d.delta)} pts</span></div>`;
+  drawGauge("#miniGauge", d.score, {small:true});
+  const util = Math.round(d.outstanding/d.line*100);
+  const carryShare = d.carried ? Math.round(d.carried/d.outstanding*100) : 0;
+  $("#fKpis").innerHTML = `
+    <div class="kpi"><div class="k">Outstanding</div><div class="v">${fmt$(d.outstanding)}</div></div>
+    <div class="kpi"><div class="k">Line utilization</div><div class="v">${util}%</div></div>
+    <div class="kpi"><div class="k">Sold · unpaid</div><div class="v ${d.carried>50000?'bad':''}">${d.carried?fmt$(d.carried):"$0"}</div></div>
+    <div class="kpi"><div class="k">% of balance carried</div><div class="v ${carryShare>20?'bad':''}">${carryShare}%</div></div>
+    <div class="kpi"><div class="k">Median payoff</div><div class="v ${d.medDays>6?'bad':''}">${d.medDays.toFixed(1)}d</div></div>
+    <div class="kpi"><div class="k">Worst unit</div><div class="v ${d.worstDays>10?'bad':''}">${d.worstDays}d</div></div>`;
+  drawHist(d); drawAging(d); drawExpo(d); renderAlerts(d);
+}
+const SEV = { critical:{c:"--critical",i:"✖"}, serious:{c:"--serious",i:"▲"}, warning:{c:"--warning",i:"▲"}, info:{c:"--accent",i:"i"}, good:{c:"--good",i:"✓"} };
+function renderAlerts(d){
+  $("#fAlerts").innerHTML = d.alerts.map(a=>{
+    const s=SEV[a.sev];
+    return `<div class="alert"><span class="sev sev-ic" style="background:var(${s.c})">${s.i}</span>
+      <div><div class="t">${a.t}</div><div class="m">${a.m}</div></div></div>`;
+  }).join("");
+}
+function drawHist(d){
+  const svg=$("#histSvg"); svg.innerHTML=""; const p=P();
+  const W=500,H=210,x0=36,x1=W-12,y0=24,y1=H-34;
+  const labels=["0–2","3–5","6–8","9–14","15+"];
+  const colors=[p.good,p.warning,p.warning,p.critical,p.critical];
+  const max=Math.max(...d.hist,1);
+  /* gridlines */
+  for(let g=0;g<=max;g+=Math.ceil(max/4)){
+    const y=y1-(y1-y0)*g/max;
+    el("line",{x1:x0,y1:y,x2:x1,y2:y,stroke:p.grid,"stroke-width":1},svg);
+    el("text",{x:x0-6,y:y+4,fill:p.muted,"font-size":10.5,"text-anchor":"end"},svg).textContent=g;
+  }
+  const bw=(x1-x0)/5;
+  d.hist.forEach((v,i)=>{
+    const h=(y1-y0)*v/max, x=x0+i*bw+bw*.18, w=bw*.64;
+    const r=el("rect",{x,y:v?y1-h:y1-2,width:w,height:v?h:2,rx:4,fill:v?colors[i]:p.grid,stroke:p.surface,"stroke-width":2},svg);
+    r.style.cursor="crosshair";
+    r.addEventListener("mousemove",e=>showTip(`<b>${labels[i]} days to payoff</b><br>${v} unit${v===1?"":"s"} in last 90 days`,e.clientX,e.clientY));
+    r.addEventListener("mouseleave",hideTip);
+    if(v) el("text",{x:x+w/2,y:y1-h-6,fill:p.ink2,"font-size":11.5,"font-weight":600,"text-anchor":"middle"},svg).textContent=v;
+    el("text",{x:x+w/2,y:H-16,fill:p.muted,"font-size":11,"text-anchor":"middle"},svg).textContent=labels[i];
+  });
+  /* grace marker between bucket 1 and 2 */
+  const gx=x0+bw;
+  el("line",{x1:gx,y1:y0-6,x2:gx,y2:y1,stroke:p.serious,"stroke-width":1.5,"stroke-dasharray":"4 4"},svg);
+  el("text",{x:gx+5,y:y0+2,fill:p.serious,"font-size":10},svg).textContent="grace";
+}
+function drawAging(d){
+  const svg=$("#agingSvg"); svg.innerHTML=""; const p=P();
+  const W=500,H=210,x0=36,x1=W-12,y0=24,y1=H-34;
+  const labels=["0–30d","31–60d","61–90d","90+d"];
+  const max=Math.max(...d.aging,1);
+  for(let g=0;g<=max;g+=Math.ceil(max/4)){
+    const y=y1-(y1-y0)*g/max;
+    el("line",{x1:x0,y1:y,x2:x1,y2:y,stroke:p.grid,"stroke-width":1},svg);
+    el("text",{x:x0-6,y:y+4,fill:p.muted,"font-size":10.5,"text-anchor":"end"},svg).textContent=g;
+  }
+  const bw=(x1-x0)/4;
+  d.aging.forEach((v,i)=>{
+    const h=(y1-y0)*v/max, x=x0+i*bw+bw*.18, w=bw*.64;
+    const fill = i===3?p.serious:p.accent;
+    const r=el("rect",{x,y:y1-h,width:w,height:h,rx:4,fill,stroke:p.surface,"stroke-width":2,opacity:i===3?1:1-(i*.18)},svg);
+    r.style.cursor="crosshair";
+    r.addEventListener("mousemove",e=>showTip(`<b>${labels[i]} on the floor</b><br>${v} units${i===3?" — past standard curtailment":""}`,e.clientX,e.clientY));
+    r.addEventListener("mouseleave",hideTip);
+    el("text",{x:x+w/2,y:y1-h-6,fill:p.ink2,"font-size":11.5,"font-weight":600,"text-anchor":"middle"},svg).textContent=v;
+    el("text",{x:x+w/2,y:H-16,fill:p.muted,"font-size":11,"text-anchor":"middle"},svg).textContent=labels[i];
+  });
+}
+function drawExpo(d){
+  const svg=$("#expoSvg"); svg.innerHTML=""; const p=P();
+  const W=500,H=230,x0=44,x1=W-14,y0=18,y1=H-30;
+  const n=12;
+  const maxV=Math.max(...d.expo)*1.12;
+  const X=i=>x0+(x1-x0)*i/(n-1), Y=v=>y1-(y1-y0)*v/maxV;
+  for(let g=0;g<=4;g++){
+    const v=maxV*g/4, y=Y(v);
+    el("line",{x1:x0,y1:y,x2:x1,y2:y,stroke:p.grid,"stroke-width":1},svg);
+    el("text",{x:x0-6,y:y+4,fill:p.muted,"font-size":10.5,"text-anchor":"end"},svg).textContent="$"+Math.round(v)+"K";
+  }
+  [0,3,6,9,11].forEach(i=>el("text",{x:X(i),y:H-10,fill:p.muted,"font-size":10.5,"text-anchor":"middle"},svg).textContent="W"+(i+1));
+  /* carried area (red) */
+  const cpts=d.carriedW.map((v,i)=>`${X(i)},${Y(v)}`).join(" ");
+  el("polyline",{points:`${X(0)},${y1} ${cpts} ${X(n-1)},${y1}`,fill:p.red,opacity:.16,stroke:"none"},svg);
+  el("polyline",{points:cpts,fill:"none",stroke:p.red,"stroke-width":2,"stroke-linejoin":"round"},svg);
+  /* outstanding line (blue) */
+  const opts_=d.expo.map((v,i)=>`${X(i)},${Y(v)}`).join(" ");
+  el("polyline",{points:opts_,fill:"none",stroke:p.accent,"stroke-width":2,"stroke-linejoin":"round"},svg);
+  /* endpoint markers + labels */
+  el("circle",{cx:X(n-1),cy:Y(d.expo.at(-1)),r:4,fill:p.accent,stroke:p.surface,"stroke-width":2},svg);
+  el("circle",{cx:X(n-1),cy:Y(d.carriedW.at(-1)),r:4,fill:p.red,stroke:p.surface,"stroke-width":2},svg);
+  el("text",{x:X(n-1)-6,y:Y(d.expo.at(-1))-10,fill:p.ink2,"font-size":11,"font-weight":600,"text-anchor":"end"},svg).textContent="$"+d.expo.at(-1).toFixed(0)+"K";
+  /* clamp so a near-zero carried label stays above the baseline instead of colliding with the axis */
+  el("text",{x:X(n-1)-6,y:Math.min(Y(d.carriedW.at(-1))+16,y1-5),fill:p.red,"font-size":11,"font-weight":600,"text-anchor":"end"},svg).textContent="$"+d.carriedW.at(-1).toFixed(1)+"K carried";
+  /* hover crosshair */
+  const hover=el("rect",{x:x0,y:y0,width:x1-x0,height:y1-y0,fill:"transparent"},svg);
+  const vline=el("line",{x1:0,y1:y0,x2:0,y2:y1,stroke:p.muted,"stroke-width":1,"stroke-dasharray":"3 3",opacity:0},svg);
+  hover.addEventListener("mousemove",e=>{
+    const r=svg.getBoundingClientRect(); const sx=(e.clientX-r.left)*(W/r.width);
+    const i=Math.max(0,Math.min(n-1,Math.round((sx-x0)/(x1-x0)*(n-1))));
+    vline.setAttribute("x1",X(i)); vline.setAttribute("x2",X(i)); vline.setAttribute("opacity",.7);
+    showTip(`<b>Week ${i+1}</b><br>outstanding $${d.expo[i].toFixed(0)}K<br>carried past grace $${d.carriedW[i].toFixed(1)}K`,e.clientX,e.clientY);
+  });
+  hover.addEventListener("mouseleave",()=>{vline.setAttribute("opacity",0); hideTip();});
+}
+
+/* ---------- simulator ---------- */
+const AVG_PAYOFF=18400, SALES_PER_MONTH=22;
+function simScore(days){
+  const excess=Math.max(0,days-2);
+  return Math.round(Math.max(430, 792 - excess*24 - Math.max(0,excess-8)*10));
+}
+function drawSimFloat(days){
+  const svg=$("#simFloatSvg"); svg.innerHTML=""; const p=P();
+  const W=360,H=120,x0=40,x1=W-14,y0=14,y1=H-26;
+  const maxD=21, maxF=SALES_PER_MONTH/30*AVG_PAYOFF*maxD;
+  const X=d=>x0+(x1-x0)*(d-1)/(maxD-1), Y=f=>y1-(y1-y0)*f/maxF;
+  for(let g=0;g<=2;g++){const v=maxF*g/2,y=Y(v);
+    el("line",{x1:x0,y1:y,x2:x1,y2:y,stroke:p.grid,"stroke-width":1},svg);
+    el("text",{x:x0-5,y:y+4,fill:p.muted,"font-size":10,"text-anchor":"end"},svg).textContent=fmt$(v);}
+  const pts=[]; for(let dd=1;dd<=maxD;dd++) pts.push(`${X(dd)},${Y(SALES_PER_MONTH/30*AVG_PAYOFF*dd)}`);
+  el("polyline",{points:`${X(1)},${y1} ${pts.join(" ")} ${X(maxD)},${y1}`,fill:p.accent,opacity:.10},svg);
+  el("polyline",{points:pts.join(" "),fill:"none",stroke:p.accent,"stroke-width":2},svg);
+  const f=SALES_PER_MONTH/30*AVG_PAYOFF*days;
+  el("line",{x1:X(days),y1:y0,x2:X(days),y2:y1,stroke:tierColor(simScore(days),p),"stroke-width":1.5,"stroke-dasharray":"4 3"},svg);
+  el("circle",{cx:X(days),cy:Y(f),r:5,fill:tierColor(simScore(days),p),stroke:p.surface,"stroke-width":2},svg);
+  el("text",{x:(x0+x1)/2,y:H-6,fill:p.muted,"font-size":10,"text-anchor":"middle"},svg).textContent="DAYS CARRIED → CASH FLOATED";
+}
+function renderSim(){
+  const days=+$("#carrySlider").value;
+  const score=simScore(days);
+  const floating=Math.round(SALES_PER_MONTH/30*AVG_PAYOFF*days);
+  const units=(SALES_PER_MONTH/30*days);
+  $("#carryVal").textContent=days+(days===1?" day":" days");
+  $("#simFloat").textContent=fmt$(floating);
+  $("#simFloat").className="v"+(days>4?" bad":"");
+  $("#simUnits").textContent=units<1?"<1":"~"+Math.round(units);
+  $("#simScore").textContent=score;
+  $("#simScore").className="v"+(score<560?" bad":"");
+  $("#simTier").innerHTML=tierChip(score);
+  const verdicts=[
+    [2,"<b>Healthy.</b> Payoffs land inside grace. Whatever floats is transactional, not structural — this dealer earns line headroom."],
+    [4,"<b>Early drift.</b> Two days past grace looks harmless per unit — but it's already a five-figure permanent float. The score notices before any payment is technically 'missed'."],
+    [7,"<b>Watch.</b> The dealer is now running part of their operation on the bank's sale proceeds. On a monthly statement, everything still looks current."],
+    [11,"<b>Elevated.</b> This is textbook pre-out-of-trust behavior: no missed curtailments, no NSF — just a six-figure interest-free loan the bank never approved."],
+    [21,"<b>Critical.</b> At this pace the float exceeds many dealers' net worth. This is where surprise defaults come from — and where FloorSight has been alarming for weeks."],
+  ];
+  $("#simVerdict").innerHTML=verdicts.find(v=>days<=v[0])[1];
+  drawGauge("#simGauge",score);
+  drawSimFloat(days);
+}
+$("#carrySlider").addEventListener("input",renderSim);
+
+/* ---------- alert feed: email push replay ---------- */
+const fmtK = n => n>=1e6 ? "$"+(n/1e6).toFixed(2)+"M" : "$"+(n%1000 ? (n/1000).toFixed(1) : Math.round(n/1000))+"K";
+const FEED_START = 612000;
+/* One event per DEALER STATE CHANGE — tier moves, drift, spikes, flags, recoveries —
+   never per car. from/to (tier keys) render as transition chips on the card. */
+const chipT = t => { const x=TIERS[t]; return `<span class="chip ${x.cls}">${x.icon} ${x.label}</span>`; };
+const FEED = [
+  {t:"Mon 07:30",sev:"warning", kind:"TIER CHANGE",    dealer:"Route 9 Motors (RT9-455)", from:"standard", to:"watch",
+   body:"Score 652 → 631 in two weeks; 3 units carried, $74K floating. Audit frequency doubled automatically.", delta:9400},
+  {t:"Mon 12:10",sev:"warning", kind:"VELOCITY DRIFT", dealer:"Lakeside Auto Group (LKS-090)",
+   body:"Median payoff slipped 2.2d → 3.1d over 30 days — four weeks of slowing in a row. Still STANDARD; put on the review list before it becomes a tier move.", delta:4100},
+  {t:"Tue 08:00",sev:"good",    kind:"RECOVERY",       dealer:"Crown City Auto (CRN-221)",
+   body:"Last carried unit cleared; 30-day velocity back inside grace. Two clean weeks from PRIME — line headroom will be restored automatically.", delta:-18000},
+  {t:"Tue 16:45",sev:"critical",kind:"EXPOSURE SPIKE", dealer:"Summit Wholesale Autos (SMT-664)",
+   body:"Carried cash doubled in six weeks — $156K → $312K — while sales volume stayed flat. 46% of the outstanding balance is now floating.", delta:23400},
+  {t:"Wed 09:20",sev:"critical",kind:"TIER CHANGE",    dealer:"Summit Wholesale Autos (SMT-664)", from:"elevated", to:"critical",
+   body:"Score 471. New advances frozen; deposit call prepared; field audit moved to this week.", delta:0},
+  {t:"Wed 15:05",sev:"serious", kind:"AUDIT FLAG",     dealer:"Harbor Auto Exchange (HBR-533)",
+   body:"2 units unverified at two consecutive lot checks — $43K of collateral unexplained for 23 days. Audit Integrity factor hit; re-check ordered.", delta:0},
+  {t:"Thu 10:30",sev:"serious", kind:"DEPOSIT CALL",   dealer:"Harbor Auto Exchange (HBR-533)",
+   body:"Score crossed below 600 — refundable deposit of $37,500 requested, sized to this dealer's cash flow (next section). Uncovered exposure drops to ≈$0 on receipt.", delta:0},
+  {t:"Fri 09:00",sev:"info",    kind:"WEEKLY DIGEST",  dealer:"Whole portfolio",
+   body:"4 of 8 dealers on watch or worse. Cash in dealers' hands up 3.1% on the week; two automatic countermeasures active (1 freeze, 1 deposit call).", delta:0},
+];
+let feedIdx=0, feedFloat=FEED_START, feedTimer=null;
+const fmtSign = d => (d>0?"+":"−")+fmtK(Math.abs(d));
+function feedCounter(){
+  $("#feedFloat").textContent = fmtK(feedFloat);
+  $("#feedFloat").classList.toggle("hot", feedFloat>FEED_START);
+  $("#feedSub").textContent = feedIdx===0 ? "live · updates with every event"
+    : feedIdx+" of "+FEED.length+" events · float "+(feedFloat>FEED_START?"rising":feedFloat<FEED_START?"falling":"flat");
+}
+function feedStop(){ if(feedTimer){clearInterval(feedTimer); feedTimer=null;} $("#feedPlay").textContent="▶ Replay the week"; }
+function feedStepFn(){
+  if(feedIdx>=FEED.length){ feedStop(); return; }
+  const ev=FEED[feedIdx++]; feedFloat+=ev.delta;
+  if(feedIdx===1) $("#inbox").innerHTML="";
+  const s=SEV[ev.sev];
+  const amt = ev.delta>0 ? `<span class="mail-amt up">${fmtSign(ev.delta)}</span>`
+            : ev.delta<0 ? `<span class="mail-amt down">${fmtSign(ev.delta)}</span>`
+            : `<span class="mail-amt flat">·</span>`;
+  const chips = ev.from ? `<div class="mail-chips">${chipT(ev.from)}<span class="arr2">→</span>${chipT(ev.to)}</div>` : "";
+  const div=document.createElement("div"); div.className="mail";
+  div.innerHTML=`<span class="sev-ic" style="background:var(${s.c}); margin-top:3px">${s.i}</span>
+    <div class="mail-b">
+      <div class="mail-top"><span class="kind ${ev.sev}">${ev.kind}</span><span>${ev.t}</span></div>
+      <div class="mail-subj">${ev.dealer}</div>
+      ${chips}
+      <div class="mail-body">${ev.body}</div>
+      <div class="mail-body" style="font-family:'Spline Sans Mono'; font-size:11.5px; margin-top:4px; color:var(--muted)">bank cash in dealers' hands → <b style="color:${ev.delta>0?'var(--critical)':'var(--ink)'}">${fmtK(feedFloat)}</b></div>
+    </div>${amt}`;
+  $("#inbox").prepend(div);
+  feedCounter();
+  if(feedIdx>=FEED.length) feedStop();
+}
+function feedResetFn(){
+  feedStop(); feedIdx=0; feedFloat=FEED_START;
+  $("#inbox").innerHTML='<div class="inbox-empty">Press <b>Replay the week</b> to stream the notifications.</div>';
+  feedCounter();
+}
+$("#feedPlay").addEventListener("click",()=>{
+  if(feedTimer){ feedStop(); return; }
+  if(feedIdx>=FEED.length) feedResetFn();
+  feedStepFn();
+  if(feedIdx<FEED.length){
+    const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    feedTimer=setInterval(feedStepFn, reduce?900:1500);
+    $("#feedPlay").textContent="❚❚ Pause";
+  }
+});
+$("#feedStep").addEventListener("click",()=>{ feedStop(); feedStepFn(); });
+$("#feedReset").addEventListener("click",feedResetFn);
+
+/* ---------- lot check: where is every car ---------- */
+/* Statuses mirror how lenders actually track collateral: seen / sold / explained
+   (body shop, transit, staff drive) / unexplained. Explanations age; unexplained
+   units hit the Audit Integrity factor. */
+const LOT_ST = {
+  on_lot:    {label:"Seen on lot",           icon:"✓"},
+  sold:      {label:"Sold — payoff pending", icon:"$"},
+  body_shop: {label:"Body shop",             icon:"B"},
+  in_transit:{label:"In transit",            icon:"T"},
+  demo:      {label:"Staff drive / demo",    icon:"D"},
+  unknown:   {label:"Missing at audit",      icon:"?"},
+};
+const CAR_NAMES=["2021 Chevrolet Silverado","2022 Honda CR-V","2019 Ford F-150","2020 Toyota RAV4","2022 Kia Sportage","2018 RAM 1500","2021 Nissan Rogue","2020 Hyundai Tucson","2019 Jeep Grand Cherokee","2022 Toyota Camry","2021 Ford Escape","2017 GMC Sierra"];
+function mkUnits(n, seed, specials){
+  const units=[];
+  for(let i=0;i<n;i++) units.push({
+    name:CAR_NAMES[(i+seed)%CAR_NAMES.length],
+    vin:"…"+String(100000+((i*7919+seed*331)%899999)),
+    st:"on_lot", days:(i*5)%4, bal:11000+((i*2713+seed*97)%17000),
+    note:null, overdue:false,
+  });
+  (specials||[]).forEach(s=>Object.assign(units[s.i],s));
+  return units;
+}
+const LOTS=[
+ {id:"meridian", name:"Meridian Motors", code:"MER-102", pick:5, units:mkUnits(41, 3, [
+   {i:5,  st:"sold", days:1, note:"Verified sale yesterday — payoff wired this morning, inside grace."},
+   {i:12, st:"sold", days:0, note:"Verified sale today — payoff due within 2 days."},
+   {i:20, st:"body_shop", days:2, note:"Hail repair at Apex Collision since Friday — photos on file."},
+   {i:33, st:"demo", days:1, note:"Sales-manager demo — due back on the lot tonight."},
+ ])},
+ {id:"harbor", name:"Harbor Auto Exchange", code:"HBR-533", pick:30, units:mkUnits(31, 8, [
+   {i:2,  st:"sold", days:3,  bal:22100, overdue:true, note:"Verified sale 3 days ago — 1 day past grace. Payoff reminder sent."},
+   {i:6,  st:"sold", days:8,  bal:19400, overdue:true, note:"8 days unpaid — counted as carried cash, escalated to the risk desk."},
+   {i:9,  st:"sold", days:12, bal:24800, overdue:true, note:"12 days unpaid — included in this dealer's deposit call."},
+   {i:13, st:"sold", days:5,  bal:20700, overdue:true, note:"5 days unpaid — 3 past grace. Second reminder sent."},
+   {i:15, st:"body_shop", days:16, note:"“At Kruger Auto Body” for 16 days — past the 14-day limit. Unit must be re-produced or escalated."},
+   {i:18, st:"body_shop", days:4,  note:"Transmission work — repair invoice on file."},
+   {i:21, st:"body_shop", days:6,  note:"Paint correction — verified by photo."},
+   {i:24, st:"in_transit", days:5, note:"Dealer trade in transit from the Sandusky lot — carrier confirmed."},
+   {i:26, st:"demo", days:9, note:"“Owner is driving it” — 9 days out. Second request to produce the unit sent."},
+   {i:28, st:"unknown", days:11, bal:21400, note:"Not found at the last audit. No explanation offered. Re-check scheduled."},
+   {i:30, st:"unknown", days:23, bal:21600, note:"Missing at TWO consecutive audits — collateral event. Score hit applied, immediate field visit ordered."},
+ ])},
+];
+let lotSel=0, lotFilter="all", lotPick=null;
+function lotRisky(u){ return u.st==="unknown" || u.overdue || (u.st==="body_shop"&&u.days>14) || (u.st==="demo"&&u.days>7); }
+function renderLot(){
+  const lot=LOTS[lotSel];
+  if(lotPick===null||lotPick>=lot.units.length) lotPick=lot.pick;
+  /* dealer toggle */
+  const sel=$("#lotSel"); sel.innerHTML="";
+  LOTS.forEach((l,i)=>{ const b=document.createElement("button");
+    b.className=i===lotSel?"on":""; b.textContent=l.code+" · "+l.name;
+    b.setAttribute("aria-pressed",i===lotSel);
+    b.addEventListener("click",()=>{lotSel=i; lotFilter="all"; lotPick=null; renderLot();});
+    sel.appendChild(b); });
+  /* status filter chips */
+  const counts={}; lot.units.forEach(u=>counts[u.st]=(counts[u.st]||0)+1);
+  const chipsBox=$("#lotChips"); chipsBox.innerHTML="";
+  const mkChip=(key,label,cnt)=>{ const b=document.createElement("button");
+    b.className=lotFilter===key?"on":"";
+    b.innerHTML=`${label} <span class="cnt">${cnt}</span>`;
+    b.setAttribute("aria-pressed",lotFilter===key);
+    b.addEventListener("click",()=>{lotFilter=key; renderLot();});
+    chipsBox.appendChild(b); };
+  mkChip("all","All units",lot.units.length);
+  Object.keys(LOT_ST).forEach(k=>{ if(counts[k]) mkChip(k,LOT_ST[k].icon+" "+LOT_ST[k].label,counts[k]); });
+  /* tile grid */
+  const grid=$("#lotGrid"); grid.innerHTML="";
+  lot.units.forEach((u,i)=>{
+    const b=document.createElement("button");
+    b.className=`lot-tile st-${u.st}${u.overdue?" overdue":""}${lotFilter!=="all"&&u.st!==lotFilter?" dim":""}${i===lotPick?" pick":""}`;
+    b.innerHTML=`<span class="ic">${LOT_ST[u.st].icon}</span><span class="dd">${u.days}d</span>`;
+    b.setAttribute("aria-label",`${u.name}: ${LOT_ST[u.st].label}, last verified ${u.days} days ago`);
+    b.addEventListener("click",()=>{lotPick=i; renderLot();});
+    b.addEventListener("mousemove",e=>showTip(`<b>${u.name}</b><br>${LOT_ST[u.st].label}${u.overdue?" · past grace":""}<br>last verified ${u.days}d ago`,e.clientX,e.clientY));
+    b.addEventListener("mouseleave",hideTip);
+    grid.appendChild(b);
+  });
+  /* summary line, tied to the same Audit Integrity grade the score uses */
+  const seen=counts.on_lot||0, unk=counts.unknown||0;
+  const carried=lot.units.filter(u=>u.overdue).reduce((s,u)=>s+u.bal,0);
+  const dref=DEALERS.find(d=>d.id===lot.id);
+  const aud=dref?gradesOf(dref)[4]:null;
+  $("#lotSummary").innerHTML=`${seen} of ${lot.units.length} units verified this cycle (${Math.round(seen/lot.units.length*100)}%)`
+    + (carried?` · ${lot.units.filter(u=>u.overdue).length} sold-unpaid past grace (${fmtK(carried)} carried)`:"")
+    + ` · <b style="color:${unk?"var(--critical)":"var(--good-text)"}">${unk} unexplained</b>`
+    + (aud!==null?` — Audit Integrity grade <b>${aud}/100</b>`:"");
+  /* detail panel */
+  const u=lot.units[lotPick];
+  $("#lotDetail").innerHTML=`
+    <div class="car">${u.name}</div>
+    <div class="vin">VIN ${u.vin} · ${lot.code}</div>
+    <div class="rowl"><span>Status</span><b>${LOT_ST[u.st].icon} ${LOT_ST[u.st].label}${u.overdue?" · PAST GRACE":""}</b></div>
+    <div class="rowl"><span>Last verified</span><b>${u.days} day${u.days===1?"":"s"} ago</b></div>
+    <div class="rowl"><span>Loan balance</span><b>${fmtK(u.bal)}</b></div>
+    ${u.note?`<div class="note${lotRisky(u)?" risk":""}">${u.note}</div>`:`<div class="note">Tap-verified by a field worker — VIN visible on the unit, one-tap confirm. Clock reset.</div>`}`;
+}
+
+/* ---------- risk-priced deposit engine ---------- */
+/* Deposit = the float this dealer's own behavior creates: (monthly cash flow ÷ 30) ×
+   typical carry days at their score tier, rounded up to $5K. Refundable, released as
+   the score recovers — the dealer self-insures the risk they generate. */
+const DEP_TIERS=[
+  {tier:"prime",    days:1.5},
+  {tier:"standard", days:3},
+  {tier:"watch",    days:6},
+  {tier:"elevated", days:9},
+  {tier:"critical", days:14},
+];
+function renderDep(){
+  const p=P();
+  const tierC={prime:p.good, standard:p.accent, watch:p.warning, elevated:p.serious, critical:p.critical};
+  const cf=+$("#depCf").value*1000;
+  const score=+$("#depScore").value;
+  const t=DEP_TIERS.find(r=>r.tier===tierOf(score));
+  const float=cf/30*t.days;
+  const dep = t.tier==="prime" ? 0 : Math.ceil(float/5000)*5000;
+  const unc=Math.max(0,float-dep);
+  $("#depCfVal").textContent=fmtK(cf)+" / mo";
+  $("#depScoreVal").textContent=score+" · "+TIERS[t.tier].label;
+  $("#depDays").textContent="~"+t.days+" days";
+  $("#depFloat").textContent=fmtK(float); $("#depFloat").className="v"+(t.days>4?" bad":"");
+  $("#depDep").textContent=dep?fmtK(dep):"$0";
+  $("#depUnc").textContent=fmtK(unc); $("#depUnc").className="v"+(unc>1000?" bad":"");
+  $("#depLadder").innerHTML=DEP_TIERS.map(r=>{
+    const rdep=r.tier==="prime"?0:Math.ceil(cf/30*r.days/5000)*5000;
+    const pct=Math.round(rdep/cf*100);
+    return `<div class="rung ${r.tier===t.tier?"on":""}">
+      <span>${TIERS[r.tier].icon} ${TIERS[r.tier].label}</span>
+      <span class="bar"><i style="width:${Math.min(100,pct*2)}%; background:${tierC[r.tier]}"></i></span>
+      <span class="pct">${rdep?fmtK(rdep)+" · "+pct+"%":"$0"}</span></div>`;
+  }).join("");
+  drawDep(float,dep,p);
+  $("#depVerdict").innerHTML = t.tier==="prime"
+    ? "<b>No deposit.</b> This dealer's payoffs land inside grace — there is no float to insure. Clean behavior is rewarded with free capital and line headroom."
+    : `<b>${TIERS[t.tier].label} terms.</b> At ${fmtK(cf)} of monthly cash flow this dealer typically floats
+       <b>${fmtK(float)}</b> of bank money. A refundable <b>${fmtK(dep)}</b> deposit
+       (${Math.round(dep/cf*100)}% of one month's cash flow) makes the dealer's own cash absorb that float —
+       uncovered exposure falls to ${fmtK(unc)}, and every point of score recovery releases deposit back.`;
+}
+function drawDep(float,dep,p){
+  const svg=$("#depSvg"); svg.innerHTML="";
+  const W=360,H=130,x0=118,x1=W-16;
+  const max=Math.max(float,dep,10000)*1.12;
+  const X=v=>x0+(x1-x0)*v/max;
+  [["Expected float",float,p.red],["Deposit held",dep,p.accent]].forEach((r,i)=>{
+    const y=30+i*40;
+    el("text",{x:x0-8,y:y+4,fill:p.ink2,"font-size":11.5,"text-anchor":"end"},svg).textContent=r[0];
+    el("rect",{x:x0,y:y-9,width:Math.max(3,X(r[1])-x0),height:18,rx:4,fill:r[2],stroke:p.surface,"stroke-width":2},svg);
+    el("text",{x:Math.min(X(r[1])+7,W-52),y:y+4,fill:p.ink,"font-size":11.5,"font-weight":600},svg).textContent=fmtK(r[1]);
+  });
+  const unc=Math.max(0,float-dep);
+  el("text",{x:(x0+x1)/2,y:H-12,fill:unc>1000?p.critical:p.goodText,"font-size":11.5,"font-weight":600,"text-anchor":"middle"},svg).textContent=
+    unc>1000 ? "uncovered exposure "+fmtK(unc) : "uncovered exposure ≈ $0 — risk sits with the dealer";
+}
+$("#depCf").addEventListener("input",renderDep);
+$("#depScore").addEventListener("input",renderDep);
+
+/* ---------- nav active state ---------- */
+const chapters=[...document.querySelectorAll("section[id]")];
+const links=[...document.querySelectorAll(".nav a.ch")];
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){
+    links.forEach(l=>l.classList.toggle("active", l.getAttribute("href")==="#"+e.target.id));
+  }});
+},{rootMargin:"-40% 0px -55% 0px"});
+chapters.forEach(c=>io.observe(c));
+
+/* ---------- draw everything ---------- */
+function drawAll(){
+  drawLifecycle(); drawCompare();
+  renderScore(); renderTable(); renderDealerFile(); renderLot(); renderSim(); renderDep();
+}
+drawAll();
+feedCounter();
+try{ mq.addEventListener("change", drawAll); }catch(e){}
+new MutationObserver(drawAll).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+</script>
+
+</body>
+</html>

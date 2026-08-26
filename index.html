@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="FloorSight — dealer risk intelligence for floorplan lenders. Product demo with fictional data.">
+<title>FloorSight Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Public+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============================================================
+   FloorSight Pitch — a keynote-grade deck, committed dark theme.
+   Every color painted explicitly; the deck is one visual world.
+   ============================================================ */
+:root{
+  --stage:#0b0f16; --slide:#10151d; --panel:#161d27; --panel2:#1c2431;
+  --ink:#eef2f6; --ink2:#a9b4c0; --muted:#67737f;
+  --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.16);
+  --blue:#3987e5; --blue-t:#86b6ef; --amber:#fab219; --red:#d03b3b; --red-t:#e05c5c; --green:#0ca30c;
+  --ease-out:cubic-bezier(.22,1,.36,1); --ease-move:cubic-bezier(.77,0,.175,1);
+  --rail:var(--blue);
+}
+*{box-sizing:border-box; margin:0}
+html,body{height:100%}
+body{
+  background:var(--stage); color:var(--ink); overflow:hidden;
+  font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace}
+:focus-visible{outline:2px solid var(--blue); outline-offset:3px; border-radius:4px}
+.visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* ---------- frame + scaled stage ---------- */
+#frame{position:fixed; inset:0; height:100dvh; touch-action:none; overflow:hidden; background:var(--stage)}
+#stage{
+  position:absolute; top:50%; left:50%; width:1280px; height:720px;
+  transform:translate(-50%,-50%); transform-origin:center;
+  background:var(--stage);
+}
+
+/* ---------- chrome ---------- */
+#brand{position:absolute; top:26px; left:36px; z-index:20; display:flex; align-items:center; gap:10px;
+  font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:19px; letter-spacing:-.01em; color:var(--ink2)}
+#brand .mk{width:24px; height:24px; border-radius:7px; background:var(--blue); color:#fff; display:grid;
+  place-items:center; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:13px; font-weight:700}
+#pageno{position:absolute; top:30px; right:36px; z-index:20; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace;
+  font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums}
+#rail{position:absolute; left:0; bottom:0; height:4px; width:100%; background:rgba(255,255,255,.06); z-index:20}
+#rail i{display:block; height:100%; width:0%; background:var(--rail); transition:width .45s var(--ease-out), background .45s}
+.navbtns{position:absolute; right:28px; bottom:18px; z-index:20; display:flex; gap:6px}
+.navbtns button{width:38px; height:38px; border-radius:10px; border:1px solid var(--line2); background:var(--panel);
+  color:var(--ink2); font-size:16px; cursor:pointer}
+.navbtns button:hover{color:var(--ink); background:var(--panel2)}
+#blackout{position:fixed; inset:0; background:#000; z-index:99; opacity:0; pointer-events:none; transition:opacity .25s}
+#blackout.on{opacity:1; pointer-events:auto}
+body.on-s0 #brand{opacity:0}
+#brand{transition:opacity .4s}
+
+/* per-slide rail color = the deck's risk arc (signature) */
+body.on-s0,body.on-s1{--rail:var(--blue)}
+body.on-s2{--rail:var(--amber)}
+body.on-s3,body.on-s4,body.on-s5{--rail:var(--red)}
+body.on-s6,body.on-s7,body.on-s8{--rail:var(--amber)}
+body.on-s9,body.on-s10{--rail:var(--blue)}
+body.on-s11,body.on-s12,body.on-s13{--rail:var(--green)}
+
+/* ---------- slides ---------- */
+.slide{position:absolute; inset:0; padding:72px 96px 64px; display:none; background:var(--stage)}
+.slide.present{display:block; animation:slidein .45s var(--ease-out)}
+@keyframes slidein{from{opacity:0; transform:translateX(26px)} to{opacity:1; transform:none}}
+.eyebrow{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:15px; font-weight:600; letter-spacing:.22em; color:var(--blue-t); margin-bottom:18px}
+.slide h2{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:46px; letter-spacing:-.015em; line-height:1.12;
+  text-wrap:balance; max-width:1000px; margin-bottom:34px}
+.slide h2 em{font-style:normal; color:var(--blue-t)}
+.foot{position:absolute; left:96px; bottom:30px; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:13px; color:var(--muted)}
+
+/* ---------- build steps ---------- */
+[data-step]{opacity:0; transform:translateY(16px);
+  transition:opacity .42s var(--ease-out), transform .42s var(--ease-out)}
+[data-step].on{opacity:1; transform:none}
+/* unbuilt steps must not eat clicks/touches or take focus while invisible */
+[data-step]:not(.on){pointer-events:none}
+.preload [data-step], .preload .slide.present{transition-duration:0s!important; animation-duration:0s!important; transition-delay:0s!important}
+
+/* ---------- shared pieces ---------- */
+.panelbox{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:26px 30px}
+.chip{display:inline-flex; align-items:center; gap:7px; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:14px; font-weight:600;
+  letter-spacing:.06em; padding:5px 14px; border-radius:99px; border:1.5px solid}
+.chip.prime{color:#4fc36b; border-color:rgba(12,163,12,.55); background:rgba(12,163,12,.12)}
+.chip.standard{color:var(--blue-t); border-color:rgba(57,135,229,.55); background:rgba(57,135,229,.12)}
+.chip.watch{color:var(--amber); border-color:rgba(250,178,25,.5); background:rgba(250,178,25,.10)}
+.chip.elevated{color:#f0926c; border-color:rgba(236,131,90,.55); background:rgba(236,131,90,.12)}
+.chip.critical{color:var(--red-t); border-color:rgba(208,59,59,.6); background:rgba(208,59,59,.13)}
+.hero-num{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em;
+  font-size:132px; line-height:1; color:var(--ink)}
+.hero-label{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:16px; letter-spacing:.08em; color:var(--ink2); margin-top:14px}
+.src{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:12.5px; color:var(--muted)}
+svg text{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace}
+
+/* ---------- s0 title ---------- */
+#s0{display:none; text-align:center}
+#s0.present{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0}
+#s0 .gmark{margin-bottom:26px}
+#s0 .gmark .arc{stroke-dasharray:100; stroke-dashoffset:100}
+#s0.present .gmark .arc{animation:arcdraw 1.1s var(--ease-out) .15s forwards}
+@keyframes arcdraw{to{stroke-dashoffset:22}}
+#s0 .gmark .needle{transform-origin:70px 64px; transform:rotate(-84deg); transition:transform 1.1s var(--ease-out) .15s}
+#s0.present .gmark .needle{transform:rotate(56deg)}
+#s0 h1{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:96px; letter-spacing:-.03em; line-height:1}
+#s0 h1 span{color:var(--blue-t)}
+#s0 .sub{font-size:26px; color:var(--ink2); margin-top:22px; max-width:34ch}
+#s0 .hint{position:absolute; bottom:56px; left:0; right:0; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:15px; color:var(--muted)}
+#s0 .hint b{color:var(--ink2)}
+
+/* ---------- s1 shift ---------- */
+.twocol{display:grid; grid-template-columns:1fr 1fr; gap:26px}
+.era{border-radius:16px; border:1px solid var(--line); padding:30px 32px; background:var(--panel)}
+.era .tag{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:15px; letter-spacing:.14em; margin-bottom:14px}
+.era.then .tag{color:var(--blue-t)} .era.now .tag{color:var(--red-t)}
+.era.now{border-color:rgba(208,59,59,.35); background:linear-gradient(180deg, rgba(208,59,59,.07), transparent 70%), var(--panel)}
+.era p{font-size:23px; line-height:1.55; color:var(--ink2)}
+.era p b{color:var(--ink)}
+.punch{margin-top:34px; font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:700; font-size:34px; letter-spacing:-.01em}
+.punch em{font-style:normal; color:var(--red-t)}
+
+/* ---------- s2 stakes ---------- */
+#s2 .hero-wrap{margin-top:8px}
+#s2 .hero-num{color:var(--amber)}
+.statrow{display:flex; gap:18px; margin-top:36px}
+.stat{flex:1; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 22px}
+.stat .v{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:700; font-size:34px; font-variant-numeric:tabular-nums}
+.stat .k{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:13.5px; color:var(--muted); margin-top:5px; letter-spacing:.05em}
+#s2 .punch{font-size:30px; margin-top:32px}
+
+/* ---------- s3 signal timeline ---------- */
+#s3 .tl{position:relative; margin-top:26px; height:330px}
+#s3 .axis-line{stroke:var(--line2); stroke-width:2; stroke-dasharray:1100; stroke-dashoffset:1100}
+#s3.present .axis-line{animation:axdraw .6s var(--ease-out) .2s forwards}
+@keyframes axdraw{to{stroke-dashoffset:0}}
+/* centered via negative margin, NOT transform — the [data-step].on build rule
+   resets transform to none, which would wipe a translateX(-50%) centering */
+.tmark{position:absolute; width:230px; margin-left:-115px}
+.tmark .dotm{width:16px; height:16px; border-radius:50%; margin:0 auto 10px; border:3px solid var(--stage)}
+.tmark .d{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:15px; font-weight:600; text-align:center}
+.tmark .t{font-size:16.5px; color:var(--ink2); text-align:center; margin-top:6px; line-height:1.4}
+.bracket{position:absolute; text-align:center}
+.bracket .bar{height:10px; border:2.5px solid var(--red-t); border-bottom:none; border-radius:8px 8px 0 0}
+.bracket .bl{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:700; font-size:25px; color:var(--red-t); margin-top:12px}
+.bracket .bs{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:14.5px; color:var(--ink2); margin-top:6px}
+
+/* ---------- s4 lead-time bars ---------- */
+.leadrow{margin-top:26px}
+.leadrow .lbl{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:16px; color:var(--ink2); margin-bottom:10px}
+.leadbar{height:46px; border-radius:10px; position:relative; overflow:hidden; background:var(--panel); border:1px solid var(--line)}
+.leadbar i{position:absolute; inset:0; border-radius:10px; transform:scaleX(0); transform-origin:left center;
+  transition:transform .8s var(--ease-out) .1s}
+[data-step].on .leadbar i{transform:scaleX(1)}
+.leadbar span{position:absolute; right:14px; top:50%; transform:translateY(-50%); font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace;
+  font-size:17px; font-weight:600; color:var(--ink)}
+#s4 .punch{font-size:32px}
+
+/* ---------- s5 carry gap unit ---------- */
+#s5 .unit{position:relative; height:300px; margin-top:16px}
+#s5 .baseline{stroke:var(--line2); stroke-width:2}
+#s5 .floorspan{stroke:var(--panel2); stroke-width:14; stroke-linecap:round}
+#s5 .gracetick{stroke:var(--amber); stroke-width:3}
+#s5 .carryspan{stroke:var(--red); stroke-width:14; stroke-linecap:round; stroke-dasharray:190; stroke-dashoffset:190;
+  transition:stroke-dashoffset .9s var(--ease-out)}
+#s5 .daybox{position:absolute; right:0; top:-6px; text-align:right}
+#s5 .daybox .dn{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:88px; font-variant-numeric:tabular-nums; line-height:1}
+#s5 .daybox .dl{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:14px; color:var(--muted); letter-spacing:.1em}
+#s5 .anno{position:absolute; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:15.5px; color:var(--ink2)}
+#s5 .anno b{color:var(--ink)}
+#s5 .anno.redb b{color:var(--red-t)}
+#s5 .punch{font-size:30px; position:absolute; bottom:0; left:0}
+
+/* ---------- s6 score anatomy ---------- */
+#s6 .wrap{display:grid; grid-template-columns:440px 1fr; gap:44px; align-items:start; margin-top:6px}
+.gaugebig .arcbg{opacity:.16}
+.gaugebig .arcval{transition:stroke-dashoffset .8s var(--ease-out), stroke .3s}
+.gaugebig .needle{transition:transform .8s var(--ease-out)}
+.gaugebig .gv{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:74px; fill:var(--ink); font-variant-numeric:tabular-nums}
+.gaugebig .gt{font-size:15px; letter-spacing:2px; font-weight:600}
+.factors .f{display:grid; grid-template-columns:250px 1fr 64px; gap:14px; align-items:center; padding:9px 0}
+.factors .fn{font-size:19px; font-weight:600}
+.factors .fb{height:12px; background:var(--panel2); border-radius:6px; overflow:hidden}
+.factors .fb i{display:block; height:100%; border-radius:6px; background:var(--blue); transform:scaleX(0);
+  transform-origin:left center; transition:transform .7s var(--ease-out)}
+.factors .f.on .fb i{transform:scaleX(1)}
+.factors .fw{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:16px; color:var(--ink2); text-align:right}
+.sliderbox{margin-top:22px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px 24px}
+.sliderbox label{font-size:18px; font-weight:600; display:block; margin-bottom:12px}
+.sliderbox input[type=range]{width:100%; accent-color:var(--blue); height:34px; cursor:pointer}
+.sliderbox .reads{display:flex; justify-content:space-between; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:14px; color:var(--muted)}
+.sliderbox .live{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:15.5px; color:var(--ink2); margin-top:10px}
+.sliderbox .live b{color:var(--ink); font-size:17px}
+
+/* ---------- s7 portfolio (cropped UI) ---------- */
+#s7 h2{font-size:40px; margin-bottom:20px}
+.uishot{background:var(--slide); border:1px solid var(--line2); border-radius:18px; padding:6px 0; margin-top:4px;
+  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.uihead{display:grid; grid-template-columns:52px 1fr 170px 120px 150px; gap:0; padding:8px 28px; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace;
+  font-size:12.5px; letter-spacing:.1em; color:var(--muted)}
+.prow{display:grid; grid-template-columns:52px 1fr 170px 120px 150px; align-items:center; padding:7px 28px;
+  border-top:1px solid var(--line); cursor:pointer; transition:opacity .25s var(--ease-out), background .2s; background:none;
+  width:100%; text-align:left; border-left:none; border-right:none; border-bottom:none; color:var(--ink); font:inherit}
+.prow .rk{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; color:var(--muted); font-size:14px}
+.prow .nm{font-weight:600; font-size:18px; white-space:nowrap}
+.prow .nm span{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:12px; color:var(--muted); font-weight:400; margin-left:10px}
+.prow .sc{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:22px; font-variant-numeric:tabular-nums}
+.prow .tr{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:14px}
+.prow .tr.up{color:#4fc36b} .prow .tr.dn{color:var(--red-t)}
+.prow .ca{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:16px; text-align:right}
+.prow .ca.hotv{color:var(--red-t); font-weight:600}
+/* Summit stays the red risk row; a viewer's manual spotlight is the neutral .sel */
+#s7 .uishot.spot .prow:not(.sel){opacity:.4}
+#s7[data-f="1"] .uishot:not(.spot) .prow:not(.hot){opacity:.4}
+.prow.hot{background:rgba(208,59,59,.07)}
+.prow.sel{background:rgba(57,135,229,.10)}
+#s7 .anno-r{margin-top:16px; font-size:22px; font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:700}
+#s7 .anno-r em{font-style:normal; color:var(--red-t)}
+
+/* ---------- s8 alert detail ---------- */
+#s8 .alerthead{display:flex; align-items:center; gap:22px; margin-bottom:26px}
+#s8 .alerthead .an{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:36px}
+#s8 .alerthead .am{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:14px; color:var(--muted); margin-top:4px}
+.sigrow{display:grid; grid-template-columns:58px 1fr 260px; gap:20px; align-items:center; background:var(--panel);
+  border:1px solid var(--line); border-radius:14px; padding:18px 24px; margin-bottom:14px}
+.sigrow .ic{width:40px; height:40px; border-radius:11px; display:grid; place-items:center; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace;
+  font-weight:700; font-size:19px; color:#fff}
+.sigrow .st{font-size:21px; font-weight:600}
+.sigrow .sd{font-size:15.5px; color:var(--ink2); margin-top:3px}
+.sigrow .sv{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:18px; text-align:right; color:var(--red-t); font-weight:600}
+.actionrow{display:flex; gap:14px; margin-top:22px}
+.action{flex:1; border:1.5px solid rgba(12,163,12,.4); background:rgba(12,163,12,.08); border-radius:13px;
+  padding:16px 20px; font-size:18px; font-weight:600}
+.action span{display:block; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:13px; color:var(--ink2); font-weight:400; margin-top:5px}
+
+/* ---------- s9 backtest ---------- */
+#s9 h2{font-size:40px; margin-bottom:20px}
+.btrow{display:grid; grid-template-columns:170px 170px 1fr 120px; gap:18px; align-items:center; padding:7px 6px;
+  border-bottom:1px solid var(--line); font-size:18px}
+.btrow.head{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:12.5px; letter-spacing:.1em; color:var(--muted); border-bottom:1px solid var(--line2)}
+.btrow .co{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-variant-numeric:tabular-nums}
+.btrow .bar{height:14px; background:var(--panel2); border-radius:7px; overflow:hidden}
+.btrow .bar i{display:block; height:100%; border-radius:7px; background:var(--blue); transform:scaleX(0);
+  transform-origin:left center; transition:transform .7s var(--ease-out) .1s}
+.btrow.on .bar i, [data-step].on .bar i{transform:scaleX(1)}
+.btrow .dv{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-weight:600; text-align:right; font-variant-numeric:tabular-nums}
+.btrow.miss .dv,.btrow.miss .co{color:var(--red-t)}
+.btrow.miss .bar i{background:var(--red); transform:scaleX(1); opacity:.25}
+#s9 .sumrow{display:flex; gap:16px; margin-top:16px; align-items:center}
+#s9 .sumrow .big{font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:800; font-size:44px; font-variant-numeric:tabular-nums}
+#s9 .sumrow .sl{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:15px; color:var(--ink2)}
+
+/* ---------- s10 control 2x2 ---------- */
+.quad{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:8px}
+.q{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:24px 28px}
+.q .qh{display:flex; align-items:center; gap:12px; font-family:"Archivo","Public Sans",system-ui,sans-serif; font-weight:700; font-size:24px; margin-bottom:10px}
+.q .qi{width:34px; height:34px; border-radius:10px; background:rgba(57,135,229,.18); color:var(--blue-t);
+  display:grid; place-items:center; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-weight:700; font-size:16px}
+.q p{font-size:17.5px; color:var(--ink2); line-height:1.55}
+.q p b{color:var(--ink)}
+
+/* ---------- s11 economics ---------- */
+#s11 .wrap{display:grid; grid-template-columns:1fr 480px; gap:44px; align-items:start}
+#s11 .hero-num{font-size:120px; color:#4fc36b}
+.scen{width:100%; border-collapse:collapse; margin-top:6px; font-size:17.5px}
+.scen th{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:12.5px; letter-spacing:.1em; color:var(--muted); text-align:left;
+  padding:8px 10px; border-bottom:1px solid var(--line2); font-weight:600}
+.scen td{padding:10px; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums}
+.scen td.mono,.scen th.r,.scen td.r{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; text-align:right}
+.scen tr.cons td{color:var(--ink); font-weight:600; background:rgba(12,163,12,.06)}
+
+/* ---------- s12 ask ---------- */
+.planrow{display:grid; grid-template-columns:190px 1fr 260px; gap:22px; align-items:center; background:var(--panel);
+  border:1px solid var(--line); border-radius:14px; padding:20px 26px; margin-bottom:14px}
+.planrow .wk{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:16px; color:var(--blue-t); font-weight:600}
+.planrow .pt{font-size:21px; font-weight:600}
+.planrow .pd{font-size:15.5px; color:var(--ink2); margin-top:3px}
+.planrow .ow{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:14.5px; color:var(--ink2); text-align:right}
+.metric{margin-top:24px; border:1.5px solid rgba(12,163,12,.45); background:rgba(12,163,12,.08); border-radius:14px;
+  padding:20px 26px; font-size:22px; font-weight:600}
+.metric .mono{color:#4fc36b}
+
+/* ---------- s13 appendix ---------- */
+.apx{width:100%; border-collapse:collapse; font-size:16.5px; margin-top:4px}
+.apx th{font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace; font-size:12px; letter-spacing:.1em; color:var(--muted); text-align:left;
+  padding:8px 10px; border-bottom:1px solid var(--line2)}
+.apx td{padding:8px 10px; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums}
+.apx td.r,.apx th.r{text-align:right; font-family:"Spline Sans Mono",ui-monospace,SFMono-Regular,monospace}
+#s13 .notes{margin-top:22px; font-size:15.5px; color:var(--ink2); max-width:70ch; line-height:1.6}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce){
+  #stage *, .slide.present{transition-duration:1ms!important; animation-duration:1ms!important; transition-delay:0s!important}
+}
+
+/* ---------- print: one slide per page, final states ---------- */
+@media print{
+  #frame{position:static; height:auto; overflow:visible}
+  #stage{position:static; transform:none!important; width:1280px; height:auto}
+  .slide{position:relative; display:block!important; height:720px; page-break-after:always; break-after:page}
+  [data-step]{opacity:1!important; transform:none!important; pointer-events:auto}
+  .leadbar i,.factors .fb i,.btrow .bar i{transform:scaleX(1)!important}
+  /* JS-driven visuals forced to their final poses (text values ship as final in the HTML) */
+  #s0{display:flex!important; flex-direction:column; align-items:center; justify-content:center; text-align:center}
+  #s0 .gmark .arc{stroke-dashoffset:22!important; animation:none!important}
+  #s0 .gmark .needle{transform:rotate(56deg)!important}
+  #s3 .axis-line{stroke-dashoffset:0!important; animation:none!important}
+  #s5 #saleDot,#s5 #payDot,#s5 #graceTick{opacity:1!important}
+  #s5 #carrySpan{stroke-dashoffset:0!important}
+  #g6arc{stroke-dashoffset:10.6!important; stroke:#4fc36b!important}
+  #g6needle{transform:rotate(71deg)!important}
+  #rail,.navbtns,#blackout{display:none}
+}
+</style>
+</head>
+<body>
+
+
+<div id="frame">
+  <div id="stage" class="preload">
+    <div id="brand" aria-hidden="true"><span class="mk">F</span>FloorSight</div>
+    <div id="pageno" aria-hidden="true">1 / 14</div>
+
+    <!-- ================= S0 · TITLE ================= -->
+    <section class="slide" id="s0" data-title="FloorSight — dealer risk intelligence">
+      <svg class="gmark" width="140" height="84" viewBox="0 0 140 84" aria-hidden="true">
+        <path d="M 14 64 A 56 56 0 0 1 126 64" fill="none" stroke="rgba(57,135,229,.22)" stroke-width="9" stroke-linecap="round"/>
+        <path class="arc" d="M 14 64 A 56 56 0 0 1 126 64" pathLength="100" fill="none" stroke="#3987e5" stroke-width="9" stroke-linecap="round"/>
+        <line class="needle" x1="70" y1="64" x2="70" y2="22" stroke="#eef2f6" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="70" cy="64" r="6" fill="#eef2f6"/>
+      </svg>
+      <h1>Floor<span>Sight</span></h1>
+      <p class="sub">A trust score for every dealer on your floorplan line.</p>
+      <p class="hint">Press <b>→</b> or click to begin · <span class="mono">F</span> fullscreen · <span class="mono">B</span> blackout</p>
+    </section>
+
+    <!-- ================= S1 · THE SHIFT ================= -->
+    <section class="slide" id="s1" data-title="Dealer failure doesn't look like it used to">
+      <div class="eyebrow">THE SHIFT</div>
+      <h2>Dealer failure doesn't look like it used to.</h2>
+      <div class="twocol">
+        <div class="era then" data-step="1">
+          <div class="tag">HOW IT USED TO FAIL</div>
+          <p>A slow quarter. Aging inventory. The field audit sees it coming, the workout starts early,
+          <b>the collateral is still on the lot.</b></p>
+        </div>
+        <div class="era now" data-step="2">
+          <div class="tag">HOW IT FAILS NOW</div>
+          <p>Cars sell in days. The dealer keeps the proceeds to stay afloat. By the next audit,
+          <b>the cars — and your cash — are already gone.</b></p>
+        </div>
+      </div>
+      <p class="punch" data-step="3">The loss happens <em>between two audits</em>.</p>
+    </section>
+
+    <!-- ================= S2 · THE STAKES ================= -->
+    <section class="slide" id="s2" data-title="The cars sold — the payoff hasn't come back">
+      <div class="eyebrow">THE STAKES</div>
+      <h2>The cars sold. The payoff hasn't come back.</h2>
+      <div class="hero-wrap">
+        <div class="hero-num" id="stakesNum">$612,400</div>
+        <div class="hero-label">SOLD &amp; UNPAID PAST THE PAYOFF WINDOW · ILLUSTRATIVE 8-DEALER BOOK</div>
+      </div>
+      <div class="statrow">
+        <div class="stat" data-step="1"><div class="v">17</div><div class="k">UNITS CARRIED</div></div>
+        <div class="stat" data-step="1"><div class="v">7 of 8</div><div class="k">DEALERS HOLDING CASH</div></div>
+        <div class="stat" data-step="1"><div class="v">19 days</div><div class="k">OLDEST UNPAID SALE</div></div>
+      </div>
+      <p class="punch" data-step="2">Every dollar of it is an interest-free loan <em>nobody approved</em>.</p>
+    </section>
+
+    <!-- ================= S3 · THE SIGNAL ================= -->
+    <section class="slide" id="s3" data-title="The first signal fires 87 days before the charge-off">
+      <div class="eyebrow">THE SIGNAL</div>
+      <h2>The first signal fires <em>87 days</em> before the charge-off.</h2>
+      <div class="tl">
+        <svg width="1088" height="70" style="position:absolute; top:150px; left:0" aria-hidden="true">
+          <line class="axis-line" x1="10" y1="35" x2="1078" y2="35"/>
+          <line x1="10" y1="27" x2="10" y2="43" stroke="rgba(255,255,255,.16)" stroke-width="2"/>
+          <line x1="1078" y1="27" x2="1078" y2="43" stroke="rgba(255,255,255,.16)" stroke-width="2"/>
+        </svg>
+        <div class="tmark" style="left:120px; top:177px" data-step="1">
+          <div class="dotm" style="background:var(--amber)"></div>
+          <div class="d" style="color:var(--amber)">DAY −87</div>
+          <div class="t">Payoff velocity drifts.<br><b style="color:var(--ink)">Score turns amber.</b></div>
+        </div>
+        <div class="tmark" style="left:430px; top:177px" data-step="2">
+          <div class="dotm" style="background:var(--amber)"></div>
+          <div class="d" style="color:var(--amber)">DAY −60</div>
+          <div class="t">Two units unexplained<br>at the lot audit.</div>
+        </div>
+        <div class="tmark" style="left:760px; top:177px" data-step="3">
+          <div class="dotm" style="background:var(--red)"></div>
+          <div class="d" style="color:var(--red-t)">DAY −21</div>
+          <div class="t">Out of trust confirmed —<br>proceeds spent.</div>
+        </div>
+        <div class="tmark" style="left:1010px; top:177px" data-step="4">
+          <div class="dotm" style="background:var(--red)"></div>
+          <div class="d" style="color:var(--red-t)">DAY 0</div>
+          <div class="t"><b style="color:var(--red-t)">Charge-off: $412,000</b></div>
+        </div>
+        <div class="bracket" style="left:120px; width:890px; top:16px" data-step="5">
+          <div class="bar"></div>
+          <div class="bl">87 days to act</div>
+          <div class="bs">freeze the line · demand curtailment · schedule the audit · call the deposit</div>
+        </div>
+      </div>
+      <div class="foot">Illustrative failure pattern — fictional dealer, fictional figures.</div>
+    </section>
+
+    <!-- ================= S4 · LEAD TIME ================= -->
+    <section class="slide" id="s4" data-title="Lead time is the whole game">
+      <div class="eyebrow">THE DIFFERENCE</div>
+      <h2>Lead time is the whole game.</h2>
+      <div class="leadrow" data-step="1">
+        <div class="lbl">PERIODIC AUDIT ALONE — problem surfaces <b style="color:var(--ink)">10 days</b> before charge-off</div>
+        <div class="leadbar"><i style="width:11%; background:linear-gradient(90deg, #d03b3b, #a22e2e)"></i><span>10 days</span></div>
+      </div>
+      <div class="leadrow" data-step="2">
+        <div class="lbl">FLOORSIGHT CARRY-GAP SIGNAL — score turns <b style="color:var(--amber)">amber 87 days</b> out</div>
+        <div class="leadbar"><i style="width:96%; background:linear-gradient(90deg, #3987e5, #1c5cab)"></i><span>87 days</span></div>
+      </div>
+      <p class="punch" data-step="3" style="margin-top:40px">77 extra days — the difference between a <em style="color:var(--blue-t)">workout</em> and a <em>write-off</em>.</p>
+    </section>
+
+    <!-- ================= S5 · MECHANISM I ================= -->
+    <section class="slide" id="s5" data-title="We measure the days between the sale and your payoff">
+      <div class="eyebrow">MECHANISM</div>
+      <h2>We measure the days between the sale and your payoff.</h2>
+      <div class="unit">
+        <div class="daybox"><div class="dn" id="dayNum">76</div><div class="dl">DAY</div></div>
+        <svg width="1000" height="120" style="position:absolute; top:110px; left:0" aria-hidden="true">
+          <line class="baseline" x1="10" y1="60" x2="990" y2="60"/>
+          <line class="floorspan" x1="14" y1="60" x2="700" y2="60"/>
+          <line class="gracetick" id="graceTick" x1="722" y1="44" x2="722" y2="76" style="opacity:0; transition:opacity .3s"/>
+          <line class="carryspan" id="carrySpan" x1="722" y1="60" x2="912" y2="60"/>
+          <circle cx="14" cy="60" r="9" fill="#3987e5" stroke="#0b0f16" stroke-width="3"/>
+          <circle id="saleDot" cx="700" cy="60" r="9" fill="#fab219" stroke="#0b0f16" stroke-width="3" style="opacity:0; transition:opacity .3s"/>
+          <circle id="payDot" cx="912" cy="60" r="9" fill="#d03b3b" stroke="#0b0f16" stroke-width="3" style="opacity:0; transition:opacity .3s .7s"/>
+        </svg>
+        <div class="anno" style="left:0; top:190px"><b>Day 0</b> — advance funded · $19,800</div>
+        <div class="anno" style="left:600px; top:190px" data-step="1"><b style="color:var(--amber)">Day 62</b> — sale independently verified</div>
+        <div class="anno" style="left:660px; top:60px" data-step="2"><b style="color:var(--amber)">Day 64</b> — payoff due</div>
+        <div class="anno redb" style="left:815px; top:190px" data-step="3"><b>Day 76</b> — payoff finally lands<br><b>12 days of your $19,800 in their pocket</b></div>
+        <p class="punch" data-step="4">Summed over every unit, every day — <em>that's the carry gap.</em></p>
+      </div>
+    </section>
+
+    <!-- ================= S6 · MECHANISM II ================= -->
+    <section class="slide" id="s6" data-title="Six behaviors — one number — updated nightly">
+      <div class="eyebrow">MECHANISM</div>
+      <h2>Six behaviors. One number. Updated nightly.</h2>
+      <div class="wrap">
+        <div>
+          <svg class="gaugebig" width="440" height="280" viewBox="0 0 440 280" aria-hidden="true">
+            <path class="arcbg" d="M 60 240 A 160 160 0 0 1 380 240" fill="none" stroke="#3987e5" stroke-width="16" stroke-linecap="round"/>
+            <path class="arcval" id="g6arc" d="M 60 240 A 160 160 0 0 1 380 240" pathLength="100" fill="none"
+              stroke="#3987e5" stroke-width="16" stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="100"/>
+            <line class="needle" id="g6needle" x1="220" y1="240" x2="220" y2="118" stroke="#eef2f6" stroke-width="5"
+              stroke-linecap="round" style="transform-origin:220px 240px; transform:rotate(-90deg)"/>
+            <circle cx="220" cy="240" r="9" fill="#eef2f6"/>
+            <text class="gv" id="g6num" x="220" y="212" text-anchor="middle">792</text>
+            <text class="gt" id="g6tier" x="220" y="238" text-anchor="middle" fill="#4fc36b">PRIME</text>
+            <text x="52" y="268" fill="#67737f" font-size="13" text-anchor="middle">300</text>
+            <text x="388" y="268" fill="#67737f" font-size="13" text-anchor="middle">850</text>
+          </svg>
+          <div class="sliderbox" data-step="2" data-interactive>
+            <label for="veloSlider">Drag one behavior: median days from sale to payoff</label>
+            <input type="range" id="veloSlider" min="1" max="14" step="1" value="2" aria-label="Median days from sale to payoff">
+            <div class="reads"><span>1 day</span><span id="veloVal" style="color:var(--ink); font-weight:600">2 days</span><span>14 days</span></div>
+            <div class="live" id="veloLive">Inside grace — the score holds <b>PRIME</b>.</div>
+          </div>
+        </div>
+        <div class="factors">
+          <div class="f" data-step="1"><span class="fn">Payoff velocity</span><span class="fb"><i style="width:100%"></i></span><span class="fw">35%</span></div>
+          <div class="f" data-step="1"><span class="fn">Carry exposure</span><span class="fb"><i style="width:57%"></i></span><span class="fw">20%</span></div>
+          <div class="f" data-step="1"><span class="fn">Inventory aging</span><span class="fb"><i style="width:43%"></i></span><span class="fw">15%</span></div>
+          <div class="f" data-step="1"><span class="fn">Curtailment discipline</span><span class="fb"><i style="width:43%"></i></span><span class="fw">15%</span></div>
+          <div class="f" data-step="1"><span class="fn">Audit integrity</span><span class="fb"><i style="width:29%"></i></span><span class="fw">10%</span></div>
+          <div class="f" data-step="1"><span class="fn">Trajectory</span><span class="fb"><i style="width:14%"></i></span><span class="fw">5%</span></div>
+          <p style="margin-top:18px; font-size:17px; color:var(--ink2)" data-step="1">Weights favor the earliest, hardest-to-fake signal:
+            how fast your money comes back after a <b style="color:var(--ink)">verified sale</b>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= S7 · PRODUCT I ================= -->
+    <section class="slide" id="s7" data-title="Monday, 7:58 AM — who do we worry about?">
+      <div class="eyebrow">THE MORNING SCREEN</div>
+      <h2>Monday, 7:58 AM: who do we worry about?</h2>
+      <div class="uishot" id="pshot">
+        <div class="uihead"><span></span><span>DEALER</span><span>TRUST SCORE</span><span>90-DAY</span><span style="text-align:right">CARRIED CASH</span></div>
+        <!-- rows injected -->
+      </div>
+      <p class="anno-r" data-step="1">One dealer is floating <em>46% of their balance</em>. The console found it before coffee.</p>
+    </section>
+
+    <!-- ================= S8 · PRODUCT II ================= -->
+    <section class="slide" id="s8" data-title="Every alert says what to do next">
+      <div class="eyebrow">THE ALERT</div>
+      <h2>Every alert says what to do next.</h2>
+      <div class="alerthead">
+        <span class="chip critical" id="magicTarget" data-magic="score-chip">✖ 471 · CRITICAL</span>
+        <div>
+          <div class="an">Summit Wholesale Autos</div>
+          <div class="am">SMT-664 · line $800K · 36 units floored · fictional dealer</div>
+        </div>
+      </div>
+      <div class="sigrow" data-step="1">
+        <span class="ic" style="background:var(--red)">1</span>
+        <div><div class="st">Payoff velocity: 11.4 days</div><div class="sd">against a 2-day payoff window — slowing five weeks in a row</div></div>
+        <div class="sv">worst unit 19 days</div>
+      </div>
+      <div class="sigrow" data-step="2">
+        <span class="ic" style="background:var(--red)">2</span>
+        <div><div class="st">$312K sold &amp; unpaid</div><div class="sd">46% of the outstanding balance is floating in the dealer's account</div></div>
+        <div class="sv">doubled in 6 weeks</div>
+      </div>
+      <div class="sigrow" data-step="3">
+        <span class="ic" style="background:var(--red)">3</span>
+        <div><div class="st">2 units unexplained</div><div class="sd">missing at two consecutive lot audits — $43K of collateral</div></div>
+        <div class="sv">23 days unseen</div>
+      </div>
+      <div class="actionrow" data-step="4">
+        <div class="action">Freeze new advances<span>automatic at CRITICAL</span></div>
+        <div class="action">Call the deposit<span>sized to this dealer's cash flow</span></div>
+        <div class="action">Field audit this week<span>scheduled, owner assigned</span></div>
+      </div>
+    </section>
+
+    <!-- ================= S9 · PROOF ================= -->
+    <section class="slide" id="s9" data-title="Seven of eight failures flagged — median 73 days early">
+      <div class="eyebrow">PROOF · RETROSPECTIVE BACKTEST</div>
+      <h2>Seven of eight failures flagged — median <em>73 days</em> early.</h2>
+      <div class="btrow head"><span>FAILURE</span><span>CHARGE-OFF</span><span>WARNING GIVEN</span><span style="text-align:right">LEAD</span></div>
+      <div data-step="1">
+        <div class="btrow"><span>Dealer A</span><span class="co">$412,000</span><span class="bar"><i style="width:78%"></i></span><span class="dv">87 d</span></div>
+        <div class="btrow"><span>Dealer B</span><span class="co">$188,000</span><span class="bar"><i style="width:57%"></i></span><span class="dv">64 d</span></div>
+      </div>
+      <div data-step="2">
+        <div class="btrow"><span>Dealer C</span><span class="co">$342,000</span><span class="bar"><i style="width:100%"></i></span><span class="dv">112 d</span></div>
+        <div class="btrow"><span>Dealer D</span><span class="co">$95,000</span><span class="bar"><i style="width:37%"></i></span><span class="dv">41 d</span></div>
+      </div>
+      <div data-step="3">
+        <div class="btrow"><span>Dealer E</span><span class="co">$267,000</span><span class="bar"><i style="width:86%"></i></span><span class="dv">96 d</span></div>
+        <div class="btrow"><span>Dealer F</span><span class="co">$151,000</span><span class="bar"><i style="width:52%"></i></span><span class="dv">58 d</span></div>
+      </div>
+      <div data-step="4">
+        <div class="btrow"><span>Dealer G</span><span class="co">$224,000</span><span class="bar"><i style="width:65%"></i></span><span class="dv">73 d</span></div>
+        <div class="btrow miss"><span>Dealer H</span><span class="co">$178,000</span><span class="bar"><i></i></span><span class="dv">missed</span></div>
+      </div>
+      <div class="sumrow" data-step="5">
+        <span class="big" id="btMedian">73</span>
+        <span class="sl">MEDIAN DAYS OF WARNING, ACROSS THE 7 CAUGHT — ILLUSTRATIVE, FICTIONAL PORTFOLIO<br>We show the miss on purpose — a 100% hit rate would mean the test is rigged. The pilot runs this same test on your book.</span>
+      </div>
+    </section>
+
+    <!-- ================= S10 · CONTROL ================= -->
+    <section class="slide" id="s10" data-title="Built to pass model-risk and vendor review">
+      <div class="eyebrow">CONTROL</div>
+      <h2>Built to pass model-risk and vendor review.</h2>
+      <div class="quad">
+        <div class="q" data-step="1"><div class="qh"><span class="qi">M</span>Model governance</div>
+          <p>Six <b>explainable factors</b>, documented methodology, human-in-the-loop on every line action. No black box in front of your examiners.</p></div>
+        <div class="q" data-step="2"><div class="qh"><span class="qi">F</span>False positives</div>
+          <p>Alert triage workflow, <b>tunable thresholds</b> per dealer tier, one-click dismissal with a full audit trail of who overrode what, and why.</p></div>
+        <div class="q" data-step="3"><div class="qh"><span class="qi">S</span>Data security</div>
+          <p>Encrypted at rest and in transit, <b>read-only feeds</b>, no consumer PII beyond what the file requires, access scoped per role.</p></div>
+        <div class="q" data-step="4"><div class="qh"><span class="qi">L</span>Implementation lift</div>
+          <p><b>No core-system integration.</b> A read-only data feed and about two hours of your team's time — running in weeks, not quarters.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= S11 · ECONOMICS ================= -->
+    <section class="slide" id="s11" data-title="The conservative case still pays for itself">
+      <div class="eyebrow">ECONOMICS</div>
+      <h2>The conservative case still pays for itself.</h2>
+      <div class="wrap">
+        <div>
+          <div class="hero-num" id="econNum">$330,000</div>
+          <div class="hero-label">CONSERVATIVE ANNUAL LOSS AVOIDANCE · ILLUSTRATIVE $100M BOOK</div>
+          <table class="scen" data-step="1">
+            <tr><th>SCENARIO</th><th class="r">FAILURES CAUGHT EARLY</th><th class="r">AVOIDED / YR</th><th class="r">NET OF COST</th></tr>
+            <tr class="cons"><td>Conservative — the headline</td><td class="r">55%</td><td class="r">$330K</td><td class="r">$235K</td></tr>
+            <tr><td>Base</td><td class="r">65%</td><td class="r">$390K</td><td class="r">$295K</td></tr>
+            <tr><td>Optimistic</td><td class="r">80%</td><td class="r">$480K</td><td class="r">$385K</td></tr>
+          </table>
+          <p class="src" style="margin-top:14px" data-step="1">Assumes 1.2% annual charge-off rate; an early flag converts half of a flagged loss into recovery; platform cost $95K/yr. All figures illustrative.</p>
+        </div>
+        <div class="sliderbox" data-step="2" data-interactive>
+          <label for="econSlider">Don't take our number — drag it down.</label>
+          <input type="range" id="econSlider" min="40" max="80" step="5" value="55" aria-label="Share of failures caught early">
+          <div class="reads"><span>40%</span><span id="econVal" style="color:var(--ink); font-weight:600">55% caught early</span><span>80%</span></div>
+          <div class="live" style="margin-top:16px">Avoided losses <b id="econAvoid">$330K</b> / yr</div>
+          <div class="live">Net of platform cost <b id="econNet">$235K</b> / yr</div>
+          <div class="live">Payback <b id="econPay">3.5 months</b></div>
+          <div class="live" id="econVerdict" style="margin-top:14px; color:var(--ink2)">Even at the floor — 40% — it pays for itself in under 5 months.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= S12 · THE ASK ================= -->
+    <section class="slide" id="s12" data-title="A 90-day retrospective pilot on your own book">
+      <div class="eyebrow">THE ASK</div>
+      <h2>A 90-day retrospective pilot on your own book.</h2>
+      <div class="planrow" data-step="1">
+        <span class="wk">WEEKS 1–2</span>
+        <div><div class="pt">Data feed + security review</div><div class="pd">Read-only extract of the floorplan ledger. No core integration.</div></div>
+        <span class="ow">OWNER: YOUR IT · ~2 HOURS</span>
+      </div>
+      <div class="planrow" data-step="2">
+        <span class="wk">WEEKS 3–8</span>
+        <div><div class="pt">Retrospective backtest, 2023–25</div><div class="pd">We score your historical book and mark every failure we would have flagged — and when.</div></div>
+        <span class="ow">OWNER: FLOORSIGHT</span>
+      </div>
+      <div class="planrow" data-step="3">
+        <span class="wk">WEEKS 9–12</span>
+        <div><div class="pt">Results readout vs. the agreed metric</div><div class="pd">Joint session with credit and model-risk. Continue, tune, or walk away.</div></div>
+        <span class="ow">OWNER: JOINT</span>
+      </div>
+      <div class="metric" data-step="4">Success, agreed in advance: <span class="mono">flag ≥ 70% of your 2023–25 defaults with ≥ 60 days of lead.</span></div>
+      <div class="foot">Bounded scope · read-only data · fixed end date · falsifiable metric</div>
+    </section>
+
+    <!-- ================= S13 · APPENDIX ================= -->
+    <section class="slide" id="s13" data-title="Appendix — the demo book behind every number">
+      <div class="eyebrow">APPENDIX</div>
+      <h2>The demo book behind every number.</h2>
+      <table class="apx">
+        <tr><th>DEALER (FICTIONAL)</th><th class="r">SCORE</th><th class="r">OUTSTANDING</th><th class="r">CARRIED</th><th class="r">MEDIAN PAYOFF</th></tr>
+        <tr><td>Meridian Motors</td><td class="r">792</td><td class="r">$842K</td><td class="r">$0</td><td class="r">1.8 d</td></tr>
+        <tr><td>Crown City Auto</td><td class="r">761</td><td class="r">$701K</td><td class="r">$18K</td><td class="r">2.2 d</td></tr>
+        <tr><td>Lakeside Auto Group</td><td class="r">718</td><td class="r">$1.10M</td><td class="r">$41K</td><td class="r">3.1 d</td></tr>
+        <tr><td>BlueStone Motors</td><td class="r">684</td><td class="r">$588K</td><td class="r">$22K</td><td class="r">3.4 d</td></tr>
+        <tr><td>Route 9 Motors</td><td class="r">631</td><td class="r">$912K</td><td class="r">$74K</td><td class="r">4.8 d</td></tr>
+        <tr><td>Harbor Auto Exchange</td><td class="r">596</td><td class="r">$566K</td><td class="r">$87K</td><td class="r">5.9 d</td></tr>
+        <tr><td>Pinnacle Auto Sales</td><td class="r">547</td><td class="r">$734K</td><td class="r">$58K</td><td class="r">6.5 d</td></tr>
+        <tr><td>Summit Wholesale Autos</td><td class="r">471</td><td class="r">$679K</td><td class="r">$312K</td><td class="r">11.4 d</td></tr>
+      </table>
+      <p class="notes">Every dealer, dollar and event in this deck is fictional and internally consistent — the same book appears on
+      the stakes slide (the $612,400 carried is the sum of the carried column, shown here to the nearest $1K), the morning screen,
+      and the alert detail. Sale events are referred to as “independently verified” throughout; scoring methodology detail is
+      available under NDA in the technical appendix.</p>
+    </section>
+  </div>
+
+  <div id="rail" aria-hidden="true"><i></i></div>
+  <div class="navbtns" aria-hidden="false">
+    <button id="btnPrev" aria-label="Previous step">‹</button>
+    <button id="btnNext" aria-label="Next step">›</button>
+  </div>
+</div>
+<div id="blackout" aria-hidden="true"></div>
+<div class="visually-hidden" aria-live="polite" id="live"></div>
+
+<script>
+"use strict";
+/* =============================================================
+   Deck engine: the whole deck is a pure render of (slide, step).
+   Every input routes through go(); builds are classes, not
+   played animations — so back-nav, deep links and rapid arrow
+   mashing all land on identical state.
+   ============================================================= */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const stage = $("#stage");
+const SLIDES = $$(".slide");
+const N = SLIDES.length;
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* per-slide max step, from the markup */
+const MAX = SLIDES.map(sl => Math.max(0, ...$$( "[data-step]").filter(e=>sl.contains(e)).map(e=>+e.dataset.step)));
+
+/* stagger siblings that share a step: 80ms per position within the group */
+SLIDES.forEach(sl=>{
+  const groups = {};
+  [...sl.querySelectorAll("[data-step]")].forEach(e=>{
+    const k = e.dataset.step;
+    (groups[k] = groups[k] || []).push(e);
+  });
+  Object.values(groups).forEach(g => g.forEach((e,i)=> e.style.transitionDelay = (i*80)+"ms"));
+});
+
+let S = 0, F = 0;
+let cleanups = [];          /* per-slide async cleanup (rAF handles etc.) */
+const onceFlags = {};       /* counters / one-shot visuals that must never replay */
+let magicClone = null;
+
+/* ---------- helpers ---------- */
+function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+const fmt = n => "$" + Math.round(n).toLocaleString("en-US");
+function tween(dur, fn, done){
+  if(REDUCED){ fn(1); done && done(); return ()=>{}; }
+  const t0 = performance.now(); let handle, finished = false;
+  /* finishing — naturally or via cancel — always SNAPS to the exact final state,
+     so a flushed tween can never leave a partial counter value on screen */
+  const finish = ()=>{ if(finished) return; finished = true; fn(1); done && done(); };
+  const loop = now => {
+    const t = clamp((now-t0)/dur, 0, 1);
+    if(t < 1){ fn(1 - Math.pow(1-t, 3)); handle = requestAnimationFrame(loop); }
+    else finish();
+  };
+  handle = requestAnimationFrame(loop);
+  const cancel = ()=>{ cancelAnimationFrame(handle); finish(); };
+  cleanups.push(cancel);
+  return cancel;
+}
+function counter(el, target, dur, prefix="$"){
+  tween(dur, p => { el.textContent = prefix + Math.round(target*p).toLocaleString("en-US"); },
+        ()=> { el.textContent = prefix + target.toLocaleString("en-US"); });
+}
+
+/* ---------- portfolio rows (s7) ---------- */
+const ROWS = [
+  ["Meridian Motors","MER-102",792,"prime","▲ 6","$0",false],
+  ["Crown City Auto","CRN-221",761,"prime","▲ 2","$18K",false],
+  ["Lakeside Auto Group","LKS-090",718,"standard","▼ 4","$41K",false],
+  ["BlueStone Motors","BLU-317",684,"standard","▲ 1","$22K",false],
+  ["Route 9 Motors","RT9-455",631,"watch","▼ 19","$74K",false],
+  ["Harbor Auto Exchange","HBR-533",596,"watch","▼ 8","$87K",false],
+  ["Pinnacle Auto Sales","PIN-208",547,"elevated","▼ 12","$58K",false],
+  ["Summit Wholesale Autos","SMT-664",471,"critical","▼ 26","$312K",true],
+];
+const shot = $("#pshot");
+ROWS.forEach((r,i)=>{
+  const b = document.createElement("button");
+  b.className = "prow"+(r[6]?" hot":"");
+  b.setAttribute("data-interactive","");
+  const tierColor = {prime:"#4fc36b",standard:"#86b6ef",watch:"#fab219",elevated:"#f0926c",critical:"#e05c5c"}[r[3]];
+  /* Summit's score renders as the compact red chip — it fits the 170px column
+     and doubles as the magic-move source into the alert slide's header chip */
+  const score = r[6]
+    ? `<span class="chip critical" data-magic="score-chip" style="font-size:16px; padding:4px 13px">✖ ${r[2]}</span>`
+    : r[2];
+  b.innerHTML = `<span class="rk">${String(i+1).padStart(2,"0")}</span>
+    <span class="nm">${r[0]}<span>${r[1]}</span></span>
+    <span class="sc" style="color:${tierColor}">${score}</span>
+    <span class="tr ${r[4].startsWith("▲")?"up":"dn"}">${r[4]} pts</span>
+    <span class="ca ${r[6]?"hotv":""}">${r[5]}</span>`;
+  b.addEventListener("click", ()=>{
+    /* neutral spotlight (.sel) — the red risk styling (.hot) stays pinned to Summit */
+    const already = b.classList.contains("sel");
+    $$("#pshot .prow").forEach(x=>x.classList.remove("sel"));
+    if(!already){ b.classList.add("sel"); shot.classList.add("spot"); }
+    else shot.classList.remove("spot");
+    b.blur();   /* a focused row must never swallow the presenter's arrow keys */
+  });
+  shot.appendChild(b);
+});
+
+/* ---------- gauge (s6) ---------- */
+function tierOf(sc){ return sc>=740?["PRIME","#4fc36b"] : sc>=650?["STANDARD","#86b6ef"] : sc>=560?["WATCH","#fab219"] : sc>=480?["ELEVATED","#f0926c"] : ["CRITICAL","#e05c5c"]; }
+let gaugeCancel = null;
+function setGauge(score, animateNum){
+  /* a running number tween must not outlive a newer value (slider vs. enter race) */
+  if(gaugeCancel){ gaugeCancel(); gaugeCancel = null; }
+  const frac = clamp((score-300)/550, 0, 1);
+  $("#g6arc").style.strokeDashoffset = 100 - frac*100;
+  $("#g6needle").style.transform = `rotate(${-90 + frac*180}deg)`;
+  const [t,c] = tierOf(score);
+  $("#g6arc").style.stroke = c;
+  $("#g6tier").textContent = t; $("#g6tier").setAttribute("fill", c);
+  if(animateNum){
+    gaugeCancel = tween(800, p => $("#g6num").textContent = Math.round(300 + (score-300)*p),
+          ()=> { $("#g6num").textContent = score; gaugeCancel = null; });
+  } else $("#g6num").textContent = score;
+}
+function veloScore(days){
+  const excess = Math.max(0, days-2);
+  return Math.round(Math.max(430, 792 - excess*24 - Math.max(0,excess-8)*10));
+}
+$("#veloSlider").addEventListener("input", e=>{
+  const d = +e.target.value;
+  const sc = veloScore(d);
+  $("#veloVal").textContent = d + (d===1?" day":" days");
+  setGauge(sc, false);
+  const [t] = tierOf(sc);
+  $("#veloLive").innerHTML = d<=2 ? "Inside grace — the score holds <b>PRIME</b>."
+    : d<=4 ? `A day or two past the window already costs real points — <b>${sc} · ${t}</b>.`
+    : d<=8 ? `The dealer is running on your cash — <b>${sc} · ${t}</b>. Audits double automatically.`
+    : `Textbook pre-out-of-trust behavior — <b>${sc} · ${t}</b>. Advances freeze, deposit call goes out.`;
+});
+
+/* ---------- economics (s11) ---------- */
+$("#econSlider").addEventListener("input", e=>{
+  const c = +e.target.value;                       /* % failures caught early */
+  const avoided = 1200000 * (c/100) * 0.5;         /* $1.2M expected losses, half recovered when flagged */
+  const net = avoided - 95000;
+  const payback = 95000 / (avoided/12);
+  $("#econVal").textContent = c + "% caught early";
+  $("#econAvoid").textContent = "$" + Math.round(avoided/1000) + "K";
+  $("#econNet").textContent = "$" + Math.round(net/1000) + "K";
+  $("#econPay").textContent = payback.toFixed(1) + " months";
+  $("#econVerdict").textContent = c===40 ? "This is the floor — and it still pays back in under 5 months."
+    : c<55 ? "Below our conservative case — still comfortably positive."
+    : c===55 ? "The conservative case — the number we quote."
+    : "Above the conservative case — we still quote the 55% row.";
+});
+
+/* ---------- per-slide enter hooks ---------- */
+const ENTER = {
+  2(){ if(onceFlags.stakes) { $("#stakesNum").textContent="$612,400"; return; }
+       onceFlags.stakes = true; counter($("#stakesNum"), 612400, 1400); },
+  6(){ setGauge(792, !onceFlags.gauge); onceFlags.gauge = true;
+       $("#veloSlider").value = 2; $("#veloVal").textContent = "2 days";
+       $("#veloLive").innerHTML = "Inside grace — the score holds <b>PRIME</b>."; },
+  11(){ if(onceFlags.econ){ $("#econNum").textContent="$330,000"; return; }
+        onceFlags.econ = true; counter($("#econNum"), 330000, 1200); },
+};
+
+/* step hooks: fired when (slide, step) is reached going forward.
+   `catchup` = we are restoring state on a slide change / deep link — hooks must
+   land on final values instantly instead of starting (possibly dueling) tweens. */
+let catchup = false;
+const dayEl = ()=> $("#dayNum");
+const STEP = {
+  "5:1"(){ sale(true);
+           if(catchup || onceFlags.day62){ onceFlags.day62 = true; dayEl().textContent="62"; return; }
+           onceFlags.day62 = true;
+           tween(800, p=> dayEl().textContent = Math.round(62*p), ()=> dayEl().textContent="62"); },
+  "5:2"(){ $("#graceTick").style.opacity = 1; },
+  "5:3"(){ $("#carrySpan").style.strokeDashoffset = 0; $("#payDot").style.opacity = 1;
+           if(catchup || onceFlags.day76){ onceFlags.day76 = true; dayEl().textContent="76"; return; }
+           onceFlags.day76 = true;
+           tween(900, p=> dayEl().textContent = Math.round(62 + 14*p), ()=> dayEl().textContent="76"); },
+};
+function sale(onOff){ $("#saleDot").style.opacity = onOff?1:0; }
+
+/* restore s5 svg pieces to the state implied by step f (pure render) */
+function renderS5(f){
+  sale(f>=1);
+  $("#graceTick").style.opacity = f>=2 ? 1 : 0;
+  $("#carrySpan").style.strokeDashoffset = f>=3 ? 0 : 190;
+  $("#payDot").style.opacity = f>=3 ? 1 : 0;
+  dayEl().textContent = f>=3 ? "76" : f>=1 ? "62" : "0";
+}
+
+/* ---------- magic move: Summit chip glides between s7 row and s8 header ---------- */
+let magicRaf = null;
+function killMagic(){
+  if(magicRaf){ cancelAnimationFrame(magicRaf); magicRaf = null; }
+  $$(".magic-clone").forEach(c=>c.remove()); magicClone = null;
+  const a = $("#magicTarget"); if(a) a.style.opacity = "";
+  const b = document.querySelector('#pshot [data-magic="score-chip"]'); if(b) b.style.opacity = "";
+}
+
+/* ---------- the dispatcher ---------- */
+let lastHashWrite = 0, hashTimer = null;
+function writeHash(){
+  const h = "#/"+S+(F?"/"+F:"");
+  const now = Date.now();
+  const doWrite = ()=>{ lastHashWrite = Date.now(); try{ history.replaceState(null,"",h); }catch(e){} };
+  if(now - lastHashWrite > 1000) doWrite();
+  else { clearTimeout(hashTimer); hashTimer = setTimeout(doWrite, 1000 - (now-lastHashWrite)); }
+}
+function announce(){ $("#live").textContent = (S+1)+" of "+N+": "+(SLIDES[S].dataset.title||""); }
+
+function go(ns, nf){
+  ns = clamp(ns, 0, N-1);
+  nf = clamp(nf, 0, MAX[ns]);
+  const slideChanged = ns !== S;
+  if(!slideChanged && nf === F) return;
+  const wasMagicPair = (S===7 && ns===8) || (S===8 && ns===7);
+  if(slideChanged){
+    /* leave: cancel async work from the old slide */
+    cleanups.forEach(fn=>fn()); cleanups = [];
+    killMagic();
+    const rememberFrom = wasMagicPair ? document.querySelector(S===7 ? '#pshot [data-magic="score-chip"]' : '#magicTarget') : null;
+    const r1 = rememberFrom && rememberFrom.getBoundingClientRect();
+    SLIDES[S].classList.remove("present");
+    S = ns; F = nf;
+    SLIDES[S].classList.add("present");
+    document.body.className = "on-s"+S;
+    renderSteps();
+    if(S===5) renderS5(F);
+    if(ENTER[S]) ENTER[S]();
+    /* fire step hooks for every step already satisfied (deep link / prev-at-last-step) */
+    catchup = true;
+    for(let i=1;i<=F;i++){ const h = STEP[S+":"+i]; if(h) h(); }
+    catchup = false;
+    if(wasMagicPair && r1 && r1.width && !REDUCED){
+      const targetSel = S===8 ? '#magicTarget' : '#pshot [data-magic="score-chip"]';
+      magicMoveFromRect(rememberFrom, r1, targetSel);
+    }
+    announce();
+  } else {
+    const forward = nf > F;
+    /* flush running tweens (they snap to final) BEFORE re-rendering, so a
+       back-step can never be overwritten by a still-running counter */
+    cleanups.forEach(fn=>fn()); cleanups = [];
+    F = nf;
+    renderSteps();
+    if(S===5) renderS5(F);
+    if(forward){ const h = STEP[S+":"+F]; if(h) h(); }
+  }
+  $("#pageno").textContent = (S+1)+" / "+N;
+  const frac = (S + (MAX[S] ? F/(MAX[S]+1) : 0)) / (N-1);
+  $("#rail i").style.width = Math.min(100, frac*100)+"%";
+  writeHash();
+}
+function magicMoveFromRect(fromEl, r1, toSel){
+  /* the clone flies INSIDE the scaled stage, in stage coordinates, so its text
+     renders at the correct size at any viewport scale; transform-origin top-left
+     makes the translate land exactly on the target's corner */
+  magicRaf = requestAnimationFrame(()=>{
+    magicRaf = null;
+    const to = document.querySelector(toSel);
+    if(!to) return;
+    const r2 = to.getBoundingClientRect();
+    if(!r2.width) return;
+    const st = stage.getBoundingClientRect();
+    const sc = (st.width / 1280) || 1;
+    const clone = fromEl.cloneNode(true);
+    clone.classList.add("magic-clone");
+    Object.assign(clone.style, { position:"absolute",
+      left:(r1.left-st.left)/sc+"px", top:(r1.top-st.top)/sc+"px",
+      margin:0, zIndex:80, pointerEvents:"none", transformOrigin:"top left",
+      display:"inline-flex", alignItems:"center", justifyContent:"center" });
+    stage.appendChild(clone);
+    to.style.opacity = 0;
+    magicClone = clone;
+    const dx = (r2.left-r1.left)/sc, dy = (r2.top-r1.top)/sc, sx = (r2.width/r1.width) || 1;
+    const anim = clone.animate(
+      [{ transform:"none" }, { transform:`translate(${dx}px,${dy}px) scale(${sx})` }],
+      { duration:600, easing:"cubic-bezier(.77,0,.175,1)", fill:"forwards" });
+    anim.onfinish = ()=>{ clone.remove(); to.style.opacity = ""; if(magicClone===clone) magicClone = null; };
+  });
+}
+function renderSteps(){
+  const sl = SLIDES[S];
+  sl.dataset.f = F;
+  [...sl.querySelectorAll("[data-step]")].forEach(e=>{
+    const i = +e.dataset.step;
+    e.classList.toggle("on", i <= F);
+    e.classList.toggle("cur", i === F);
+  });
+}
+function next(){ if(F < MAX[S]) go(S, F+1); else go(S+1, 0); }
+function prev(){ if(F > 0) go(S, F-1); else if(S > 0) go(S-1, MAX[S-1]); }
+
+/* ---------- input ---------- */
+addEventListener("keydown", e=>{
+  /* only elements that genuinely consume arrow keys keep them (sliders etc.);
+     buttons and other [data-interactive] surfaces must not kill deck navigation */
+  if(e.target.closest("input,select,textarea,[contenteditable]")) return;
+  const k = e.key;
+  if(k==="ArrowRight"||k==="ArrowDown"||k===" "||k==="PageDown"){ e.preventDefault(); e.shiftKey && k===" " ? prev() : next(); }
+  else if(k==="ArrowLeft"||k==="ArrowUp"||k==="PageUp"){ e.preventDefault(); prev(); }
+  else if(k==="Home"){ e.preventDefault(); go(0,0); }
+  else if(k==="End"){ e.preventDefault(); go(N-1, MAX[N-1]); }
+  else if(k==="f"||k==="F"){ document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); }
+  else if(k==="b"||k==="B"||k==="."){ $("#blackout").classList.toggle("on"); }
+});
+$("#frame").addEventListener("click", e=>{
+  if(e.target.closest("[data-interactive],button,a,input")) return;
+  next();
+});
+$("#btnNext").addEventListener("click", next);
+$("#btnPrev").addEventListener("click", prev);
+
+/* touch: horizontal swipe with axis dominance; widgets exempt */
+let tx=null, ty=null;
+addEventListener("touchstart", e=>{
+  if(e.target.closest("[data-interactive]")) { tx=null; return; }
+  tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+}, {passive:true});
+addEventListener("touchend", e=>{
+  if(tx===null) return;
+  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+  if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) dx < 0 ? next() : prev();
+  tx = null;
+}, {passive:true});
+
+/* ---------- hash ---------- */
+function parseHash(){
+  const m = location.hash.match(/^#\/(\d+)(?:\/(\d+))?/);
+  return m ? [clamp(+m[1],0,N-1), +(m[2]||0)] : [0,0];
+}
+addEventListener("hashchange", ()=>{
+  const [hs,hf] = parseHash();
+  if(hs!==S || hf!==F) go(hs,hf);
+});
+
+/* ---------- layout ---------- */
+function layout(){
+  const s = Math.round(Math.min(innerWidth/1280, innerHeight/720) * 100) / 100;
+  stage.style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+addEventListener("resize", layout);
+layout();
+
+/* ---------- boot ---------- */
+const [bs,bf] = parseHash();
+SLIDES.forEach(sl=>sl.classList.remove("present"));
+S = -1; F = 0;                 /* force go() to treat boot as a slide change */
+SLIDES[0].classList.add("present"); S = 0;   /* seed, then go() re-renders cleanly */
+document.body.className = "on-s0";
+go(bs, bf);
+if(bs===0 && bf===0){ renderSteps(); announce(); }
+requestAnimationFrame(()=> requestAnimationFrame(()=> stage.classList.remove("preload")));
+</script>
+
+</body>
+</html>
